@@ -138,4 +138,15 @@ export const wantedAlertsApi = {
   getMatches: (id) => api.get(`/wanted-alerts/${id}/matches`),
 };
 
+// ── Exchanges / Handover Transactions ─────────────────────────────────────────
+export const exchangesApi = {
+  getAll: (params) => api.get('/exchanges', { params }),
+  getOne: (id) => api.get(`/exchanges/${id}`),
+  proposeHandover: (id, data) => api.post(`/exchanges/${id}/handover-proposals`, data),
+  respondProposal: (id, proposalId, data) => api.patch(`/exchanges/${id}/handover-proposals/${proposalId}/respond`, data),
+  confirmHandover: (id) => api.post(`/exchanges/${id}/confirm-handover`),
+  raiseDispute: (id, data) => api.post(`/exchanges/${id}/disputes`, data),
+  getHistory: (id) => api.get(`/exchanges/${id}/history`),
+};
+
 export default api;

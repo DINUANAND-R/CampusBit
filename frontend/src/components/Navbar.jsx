@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { conversationsApi } from '../api';
 import NotificationCenter from './NotificationCenter';
-import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare } from 'lucide-react';
+import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare, Handshake } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -81,6 +81,10 @@ export default function Navbar() {
               <Link to="/dashboard" className="btn btn-secondary btn-sm">
                 <LayoutDashboard size={15} />
                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+              <Link to="/exchange" id="nav-exchange-link" className="btn btn-secondary btn-sm flex items-center gap-1.5" title="My Transactions & Handover">
+                <Handshake size={15} className="text-emerald-400" />
+                <span className="hidden md:inline">Exchange</span>
               </Link>
               <Link to="/chat" id="nav-chat-link" className="btn btn-secondary btn-sm relative flex items-center gap-1.5">
                 <MessageSquare size={15} className="text-brand-400" />

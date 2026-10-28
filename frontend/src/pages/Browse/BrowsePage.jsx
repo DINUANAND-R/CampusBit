@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { listingsApi } from '../../api';
+import { useSocket } from '../../context/SocketContext';
 import ListingCard from '../../components/ListingCard';
 import { Search, SlidersHorizontal, Gavel, Sparkles } from 'lucide-react';
 
@@ -14,6 +15,7 @@ const SORTS = [
 
 export default function BrowsePage() {
   const [params, setParams] = useSearchParams();
+  const { socket } = useSocket();
   const [listings, setListings] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,8 +25,8 @@ export default function BrowsePage() {
   const category = params.get('category') || '';
   const sort     = params.get('sort') || 'endsAt';
 
-  const fetchListings = useCallback(async () => {
-    setLoading(true);
+  const fetchListings = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const { data } = await listingsApi.getAll({
         q: q || undefined,
@@ -38,13 +40,77 @@ export default function BrowsePage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [q, category, sort, page]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
   // Reset to page 1 on filter change
   useEffect(() => { setPage(1); }, [q, category, sort]);
+
+  // Real-time Socket.IO synchronization for public listings feed
+  useEffect(() => {
+    if (!socket) return;
+
+    // When an auction receives a new bid
+    const handleBidUpdate = (data) => {
+      setListings((prev) =>
+        prev.map((l) =>
+          l._id === data.listingId
+            ? { ...l, currentPrice: data.amount, endsAt: data.endsAt || l.endsAt }
+            : l
+        )
+      );
+    };
+
+    // When an auction extends in the last 30 seconds
+    const handleExtended = (data) => {
+      setListings((prev) =>
+        prev.map((l) =>
+          l._id === data.listingId ? { ...l, endsAt: data.newEndsAt } : l
+        )
+      );
+    };
+
+    // When a new listing or scheduled listing publishes
+    const handlePublished = (data) => {
+      // Re-fetch silently or prepend if on first page
+      if (page === 1 && !q) {
+        if (!category || category === 'all' || category === data.category) {
+          fetchListings(true);
+        }
+      }
+    };
+
+    // When an auction closes or is cancelled, remove it from active feed
+    const handleClosedOrCancelled = (data) => {
+      setListings((prev) => prev.filter((l) => l._id !== data.listingId));
+      setTotal((prev) => Math.max(0, prev - 1));
+    };
+
+    // On socket reconnect, synchronize feed automatically
+    const handleReconnect = () => {
+      fetchListings(true);
+    };
+
+    socket.on('auction:bid_update', handleBidUpdate);
+    socket.on('auction:extended', handleExtended);
+    socket.on('auction:published', handlePublished);
+    socket.on('auction:status_change', handlePublished);
+    socket.on('auction:closed', handleClosedOrCancelled);
+    socket.on('auction:cancelled', handleClosedOrCancelled);
+    socket.on('connect', handleReconnect);
+
+    return () => {
+      socket.off('auction:bid_update', handleBidUpdate);
+      socket.off('auction:extended', handleExtended);
+      socket.off('auction:published', handlePublished);
+      socket.off('auction:status_change', handlePublished);
+      socket.off('auction:closed', handleClosedOrCancelled);
+      socket.off('auction:cancelled', handleClosedOrCancelled);
+      socket.off('connect', handleReconnect);
+    };
+  }, [socket, page, q, category, fetchListings]);
 
   const setFilter = (key, val) => {
     const next = new URLSearchParams(params);

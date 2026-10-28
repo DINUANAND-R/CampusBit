@@ -1,11 +1,13 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
+import { useAuth } from './AuthContext';
 
 const SocketContext = createContext(null);
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 export const SocketProvider = ({ children }) => {
+  const { user } = useAuth();
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
@@ -15,6 +17,8 @@ export const SocketProvider = ({ children }) => {
       autoConnect: true,
       transports: ['websocket', 'polling'],
       auth: { token },
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
     });
     socketRef.current = s;
 
@@ -28,8 +32,22 @@ export const SocketProvider = ({ children }) => {
 
     s.on('disconnect', () => setConnected(false));
 
-    return () => { s.disconnect(); };
+    return () => {
+      s.disconnect();
+    };
   }, []);
+
+  // Re-authenticate whenever user session changes (login / refresh / switch account)
+  useEffect(() => {
+    const s = socketRef.current;
+    if (s && user) {
+      const currentToken = localStorage.getItem('access_token');
+      if (currentToken) {
+        s.auth = { token: currentToken };
+        s.emit('user:auth', currentToken);
+      }
+    }
+  }, [user]);
 
   return (
     <SocketContext.Provider value={{ socket: socketRef.current, connected }}>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { listingsApi, bidsApi } from '../../api';
 import Countdown from '../../components/Countdown';
 import toast from 'react-hot-toast';
@@ -24,6 +25,7 @@ const statusColor = {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const [myListings, setMyListings] = useState([]);
   const [myBids,     setMyBids]     = useState([]);
   const [tab,        setTab]        = useState('listings'); // 'listings' | 'bids'
@@ -35,7 +37,8 @@ export default function DashboardPage() {
   const [cancelReason,  setCancelReason]  = useState('');
   const [cancelling,    setCancelling]    = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [{ data: ld }, { data: bd }] = await Promise.all([
         listingsApi.myListings(),
@@ -44,15 +47,67 @@ export default function DashboardPage() {
       setMyListings(ld.listings || []);
       setMyBids(bd.bids || []);
     } catch (err) {
-      toast.error('Failed to load dashboard data');
+      if (!silent) toast.error('Failed to load dashboard data');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  // Real-time synchronization for dashboard listings, bids, and status updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBidUpdate = (data) => {
+      // If someone bid on a seller listing
+      setMyListings((prev) =>
+        prev.map((l) =>
+          l._id === data.listingId
+            ? { ...l, currentPrice: data.amount, endsAt: data.endsAt || l.endsAt }
+            : l
+        )
+      );
+      // Silently refresh bids list if user is bidder or seller
+      fetchData(true);
+    };
+
+    const handleListingStatus = (data) => {
+      setMyListings((prev) =>
+        prev.map((l) =>
+          l._id === data.listingId
+            ? { ...l, status: data.status, endsAt: data.endsAt || l.endsAt }
+            : l
+        )
+      );
+    };
+
+    const handlePublishedOrExchange = () => {
+      fetchData(true);
+    };
+
+    socket.on('auction:bid_update', handleBidUpdate);
+    socket.on('auction:status_change', handleListingStatus);
+    socket.on('auction:cancelled', handleListingStatus);
+    socket.on('auction:closed', handleListingStatus);
+    socket.on('auction:published', handlePublishedOrExchange);
+    socket.on('exchange:created', handlePublishedOrExchange);
+    socket.on('exchange:update', handlePublishedOrExchange);
+    socket.on('connect', handlePublishedOrExchange);
+
+    return () => {
+      socket.off('auction:bid_update', handleBidUpdate);
+      socket.off('auction:status_change', handleListingStatus);
+      socket.off('auction:cancelled', handleListingStatus);
+      socket.off('auction:closed', handleListingStatus);
+      socket.off('auction:published', handlePublishedOrExchange);
+      socket.off('exchange:created', handlePublishedOrExchange);
+      socket.off('exchange:update', handlePublishedOrExchange);
+      socket.off('connect', handlePublishedOrExchange);
+    };
+  }, [socket, fetchData]);
 
   const handleConfirmCancel = async () => {
     if (!targetListing) return;

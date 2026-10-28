@@ -8,7 +8,7 @@ import AuctionDiscussionBox from '../../components/AuctionDiscussionBox';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare, Handshake
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -530,12 +530,18 @@ export default function ListingDetailPage() {
               </p>
             )}
 
-            {/* Handover link for closed auctions */}
+            {/* Handover & Exchange link for closed auctions */}
             {(listing.status === 'closed' || listing.status === 'completed') && (
-              <Link to={`/handover/${id}`} id="handover-link"
-                className="btn btn-primary w-full mt-2">
-                <ChevronRight size={16} /> View Handover Status
-              </Link>
+              <div className="flex flex-col gap-2 mt-2">
+                <Link to="/exchange" id="exchange-link"
+                  className="btn btn-primary w-full flex items-center justify-center gap-2">
+                  <Handshake size={16} /> Manage Product Exchange
+                </Link>
+                <Link to={`/handover/${id}`} id="handover-link"
+                  className="btn btn-secondary w-full text-xs flex items-center justify-center gap-1">
+                  <ChevronRight size={14} /> Legacy Handover View
+                </Link>
+              </div>
             )}
           </div>
 

@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Listing = require('../models/Listing');
 const Handover = require('../models/Handover');
+const { createExchangeForClosedAuction } = require('../services/exchangeService');
 
 /**
  * Runs every 10 seconds.
@@ -32,16 +33,8 @@ const startAuctionCloser = (io) => {
 
             if (!updated) continue; // Already processed concurrently
 
-            // Create handover record
-            const existing = await Handover.findOne({ listing: listing._id });
-            if (!existing) {
-              await Handover.create({
-                listing: listing._id,
-                seller: listing.seller,
-                buyer: listing.winner,
-                finalPrice: listing.currentPrice,
-              });
-            }
+            // Create handover record (legacy) and rich Exchange record
+            await createExchangeForClosedAuction(listing, io);
 
             // Notify clients in room
             if (io) {
