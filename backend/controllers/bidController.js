@@ -1,5 +1,10 @@
 const Bid = require('../models/Bid');
 const Listing = require('../models/Listing');
+const {
+  evaluateProxyBids,
+  setOrUpdateProxyBid,
+  getBuyerProxyBid,
+} = require('../services/proxyBidService');
 
 const LATE_BID_WINDOW_MS = 30 * 1000; // 30 seconds
 
@@ -117,7 +122,44 @@ exports.placeBidHttp = async (req, res, next) => {
       }
     }
 
+    // Evaluate proxy bids in case another bidder's maximum automatically counters
+    try {
+      await evaluateProxyBids(listingId, io);
+    } catch (proxyErr) {
+      console.error('[BidController] Proxy evaluation error after manual bid:', proxyErr);
+    }
+
     res.status(201).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/bids/proxy or POST /api/auctions/:auctionId/proxy-bids
+exports.setProxyBidHttp = async (req, res, next) => {
+  try {
+    const listingId = req.params.auctionId || req.body.listingId;
+    const maxAmount = req.body.maxAmount;
+    if (!listingId || maxAmount === undefined) {
+      return res.status(400).json({ message: 'listingId and maxAmount are required' });
+    }
+    const io = req.app.get('io');
+    const result = await setOrUpdateProxyBid(listingId, req.user._id, maxAmount, io);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/bids/listing/:id/proxy or GET /api/auctions/:auctionId/proxy-bids/me
+exports.getProxyBidHttp = async (req, res, next) => {
+  try {
+    const listingId = req.params.auctionId || req.params.id;
+    if (!listingId) {
+      return res.status(400).json({ message: 'listingId is required' });
+    }
+    const proxyBid = await getBuyerProxyBid(listingId, req.user._id);
+    res.json({ proxyBid });
   } catch (err) {
     next(err);
   }

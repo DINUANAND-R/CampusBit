@@ -42,8 +42,13 @@ Featuring **real-time live bidding**, **automated auction extensions**, **multi-
 
 ## ✨ Features
 
-### 1. ⚡ Real-Time Live Auctions & Bidding
+### 1. ⚡ Real-Time Live Auctions & Automatic Proxy Bidding
 - **Instant Bid Broadcasts**: Bids propagate immediately across active clients in authenticated auction rooms without manual page refreshes.
+- **Automatic Proxy Bidding (Maximum Bid)**:
+  - Buyers can commit a private maximum bid (`maxAmount`). The backend engine automatically places bids on their behalf by the minimum required increment, never exceeding their maximum limit.
+  - **Deterministic Tie-Break Rule**: In case of equal maximum amounts, the earliest submitted commitment wins priority and the price rises to that maximum.
+  - **Private Maximum Confidentiality**: A buyer's maximum is strictly confidential and never exposed in public endpoints, public socket broadcasts, bid history, or logs.
+  - **Seamless Manual Bid Integration**: When another bidder places a manual bid below an active proxy maximum, the proxy automatically counters to maintain the lead.
 - **Anti-Sniping Protection**: Server-side rule extends the auction countdown by 30 seconds if a bid is placed in the final 30 seconds (up to 10 extensions).
 - **Authoritative Server Validation**: Bids are validated against current price, minimum increment, auction time window, and seller ownership rules.
 
@@ -209,10 +214,11 @@ node scripts/promote-admin.js <user-email-or-username>
 
 ## 🧪 Automated Test Suites
 
-The project features **7 automated end-to-end test suites** with **238 assertions** verifying business logic, access control, concurrency, and real-time Socket.IO synchronization:
+The project features **8 automated end-to-end test suites** with **285 assertions** verifying business logic, access control, concurrency, proxy pricing, and real-time Socket.IO synchronization:
 
 | Test Suite | Purpose | Command |
 | :--- | :--- | :--- |
+| **Automatic Proxy Bidding** | Incremental auto-bids, tie-breaking, privacy, manual bid counters | `node test-proxy-bidding.js` |
 | **Product Exchange Workflow** | Handover proposals, two-party confirmation, disputes, idempotency | `node test-exchange-workflow.js` |
 | **Smart Wanted Alerts** | Keyword/budget matching, offline notifications, student privacy | `node test-wanted-alerts.js` |
 | **Global Notifications** | New listing broadcast campaign, read counters, socket delivery | `node test-notifications.js` |
@@ -224,6 +230,7 @@ The project features **7 automated end-to-end test suites** with **238 assertion
 To run the complete test suite:
 ```bash
 cd backend
+node test-proxy-bidding.js
 node test-exchange-workflow.js
 node test-wanted-alerts.js
 node test-notifications.js

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 const { placeBidCore } = require('../controllers/bidController');
+const { setOrUpdateProxyBid } = require('../services/proxyBidService');
 
 /**
  * Authenticate a socket by checking the token sent in socket.handshake.auth.token
@@ -82,6 +83,21 @@ const registerSocketHandlers = (io) => {
             extensionCount: listing.extensionCount,
           });
         }
+      } catch (err) {
+        socket.emit('auction:error', { message: err.message });
+      }
+    });
+
+    socket.on('auction:proxy_bid', async ({ listingId, maxAmount, token }) => {
+      const user = await authenticateSocket(token);
+      if (!user) {
+        socket.emit('auction:error', { message: 'Authentication required to set maximum bid' });
+        return;
+      }
+
+      try {
+        const result = await setOrUpdateProxyBid(listingId, user._id, maxAmount, io);
+        socket.emit('proxy:success', result);
       } catch (err) {
         socket.emit('auction:error', { message: err.message });
       }

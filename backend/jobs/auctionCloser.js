@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const Listing = require('../models/Listing');
 const Handover = require('../models/Handover');
 const { createExchangeForClosedAuction } = require('../services/exchangeService');
+const { notifyAuctionCloseParticipants } = require('../services/proxyBidService');
 
 /**
  * Runs every 10 seconds.
@@ -35,6 +36,9 @@ const startAuctionCloser = (io) => {
 
             // Create handover record (legacy) and rich Exchange record
             await createExchangeForClosedAuction(listing, io);
+
+            // Notify proxy participants of outcome
+            await notifyAuctionCloseParticipants(listing, io);
 
             // Notify clients in room
             if (io) {

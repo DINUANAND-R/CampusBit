@@ -8,7 +8,8 @@ import AuctionDiscussionBox from '../../components/AuctionDiscussionBox';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare, Handshake
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare, Handshake,
+  ShieldCheck, Lock, Sparkles
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -42,10 +43,15 @@ export default function ListingDetailPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportCategory, setReportCategory] = useState('inappropriate_content');
   const [reportDescription, setReportDescription] = useState('');
-  const [submittingReport, setSubmittingReport] = useState(false);
+  const [proxyBid, setProxyBid] = useState(null);
+  const [proxyAmount, setProxyAmount] = useState('');
+  const [settingProxy, setSettingProxy] = useState(false);
+  const [proxyError, setProxyError] = useState('');
+  const [bidMode, setBidMode] = useState('proxy'); // 'proxy' or 'manual'
+
   const bidListRef = useRef(null);
 
-  // Load listing + bid history
+  // Load listing + bid history + user's proxy commitment
   const load = useCallback(async () => {
     try {
       const [{ data: ld }, { data: bd }] = await Promise.all([
@@ -54,14 +60,29 @@ export default function ListingDetailPage() {
       ]);
       setListing(ld.listing);
       setBids(bd.bids || []);
-      setBidAmount(String((ld.listing.currentPrice + ld.listing.minBidIncrement) || ''));
+      const nextMin = (ld.listing.leadingBid || ld.listing.winner)
+        ? ld.listing.currentPrice + ld.listing.minBidIncrement
+        : ld.listing.startingPrice + ld.listing.minBidIncrement;
+      setBidAmount(String(nextMin || ''));
+
+      if (user) {
+        try {
+          const { data: pd } = await bidsApi.getProxy(id);
+          setProxyBid(pd.proxyBid || null);
+          if (pd.proxyBid) {
+            setProxyAmount(String(pd.proxyBid.maxAmount));
+          } else {
+            setProxyAmount(String(nextMin || ''));
+          }
+        } catch {}
+      }
     } catch {
       toast.error('Listing not found or not active');
       navigate('/');
     } finally {
       setLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, user, navigate]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -121,6 +142,27 @@ export default function ListingDetailPage() {
       } : prev);
     };
 
+    const onProxyLeading = (data) => {
+      if (data.listingId !== id) return;
+      toast.success('✨ Your maximum bid is currently leading!');
+      load();
+    };
+
+    const onProxyOutbid = (data) => {
+      if (data.listingId !== id) return;
+      toast.error(`⚠️ You've been outbid! Current lead: ₹${data.currentPrice?.toLocaleString()}`, { duration: 5000 });
+      load();
+    };
+
+    const onProxyUpdated = (data) => {
+      if (data.listingId !== id) return;
+      setProxyBid((prev) => ({
+        ...(prev || {}),
+        maxAmount: data.maxAmount,
+        status: data.isLeader ? 'active' : 'outbid',
+      }));
+    };
+
     const onError = ({ message }) => toast.error(message);
 
     socket.on('auction:bid_update', onBidUpdate);
@@ -129,6 +171,9 @@ export default function ListingDetailPage() {
     socket.on('auction:cancelled',  onCancelled);
     socket.on('auction:status_change', onStatusChange);
     socket.on('auction:error',      onError);
+    socket.on('proxy:leading',      onProxyLeading);
+    socket.on('proxy:outbid',       onProxyOutbid);
+    socket.on('proxy:updated',      onProxyUpdated);
 
     return () => {
       socket.emit('auction:leave', id);
@@ -138,6 +183,9 @@ export default function ListingDetailPage() {
       socket.off('auction:cancelled',  onCancelled);
       socket.off('auction:status_change', onStatusChange);
       socket.off('auction:error',      onError);
+      socket.off('proxy:leading',      onProxyLeading);
+      socket.off('proxy:outbid',       onProxyOutbid);
+      socket.off('proxy:updated',      onProxyUpdated);
     };
   }, [socket, id]);
 
@@ -154,12 +202,54 @@ export default function ListingDetailPage() {
       await bidsApi.place(id, amount);
       setBidAmount(String(amount + listing.minBidIncrement));
       toast.success(`Bid of ₹${amount} placed!`);
+      load();
     } catch (err) {
       const msg = err.response?.data?.message || 'Bid failed';
       setBidError(msg);
       toast.error(msg);
     } finally {
       setBidding(false);
+    }
+  };
+
+  const handleSetProxyBid = async (e) => {
+    e?.preventDefault();
+    setProxyError('');
+    const amount = Number(proxyAmount);
+    if (!user) { toast.error('Please login to set maximum bid'); navigate('/login'); return; }
+    if (!amount || isNaN(amount) || !Number.isInteger(amount) || amount <= 0) {
+      setProxyError('Enter a valid whole amount in ₹');
+      return;
+    }
+    const hasBids = Boolean(listing.leadingBid || listing.winner);
+    const minRequired = hasBids
+      ? listing.currentPrice + listing.minBidIncrement
+      : listing.startingPrice + listing.minBidIncrement;
+
+    const isCurrentLeader = user?._id && listing.winner && (listing.winner._id === user._id || listing.winner === user._id);
+
+    if (amount < minRequired && !isCurrentLeader) {
+      setProxyError(`Maximum bid must be at least ₹${minRequired.toLocaleString()}`);
+      return;
+    }
+
+    if (isCurrentLeader && amount < listing.currentPrice) {
+      setProxyError(`Cannot set maximum lower than your current committed price ₹${listing.currentPrice.toLocaleString()}`);
+      return;
+    }
+
+    setSettingProxy(true);
+    try {
+      const { data } = await bidsApi.setProxy(id, amount);
+      toast.success(data.message || 'Maximum bid placed!');
+      setProxyBid(data.proxyBid);
+      load();
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to set maximum bid';
+      setProxyError(msg);
+      toast.error(msg);
+    } finally {
+      setSettingProxy(false);
     }
   };
 
@@ -469,40 +559,163 @@ export default function ListingDetailPage() {
               </div>
             )}
 
-            {/* Bid input (only when active and not seller) */}
+            {/* Leading Bidder Indicator */}
+            <div className="flex items-center gap-2 mb-3 bg-surface-700/30 p-2.5 rounded-xl border border-white/5">
+              <span className="text-xs text-slate-400">Leading Bidder:</span>
+              {listing.winner ? (
+                (user?._id && (listing.winner._id === user._id || listing.winner === user._id)) ? (
+                  <span className="badge bg-emerald-400/15 text-emerald-400 border border-emerald-400/30 text-xs font-700 flex items-center gap-1">
+                    <CheckCircle size={11} /> You are leading
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-200 font-600 flex items-center gap-1">
+                    <User size={12} className="text-brand-400" />
+                    @{typeof listing.winner === 'object' ? listing.winner.username : 'Active Bidder'}
+                  </span>
+                )
+              ) : (
+                <span className="text-xs text-slate-500 italic">No bids yet</span>
+              )}
+            </div>
+
+            {/* Bidding panel (only when active and not seller) */}
             {isActive && !isSeller && (
               <div className="flex flex-col gap-3">
-                <div>
-                  <label className="text-xs font-600 text-slate-300 uppercase tracking-wider mb-1.5 block">
-                    Your bid (min ₹{minBid?.toLocaleString()})
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="bid-amount-input"
-                      type="number"
-                      min={minBid}
-                      step={listing.minBidIncrement}
-                      value={bidAmount}
-                      onChange={(e) => { setBidAmount(e.target.value); setBidError(''); }}
-                      className="input"
-                      placeholder={`Min ₹${minBid}`}
-                    />
-                    <button
-                      id="place-bid-btn"
-                      onClick={placeBid}
-                      disabled={bidding || !user}
-                      className="btn btn-primary whitespace-nowrap"
-                    >
-                      <Gavel size={16} />
-                      {bidding ? 'Placing…' : 'Place Bid'}
-                    </button>
-                  </div>
-                  {bidError && (
-                    <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1">
-                      <AlertTriangle size={12} /> {bidError}
-                    </p>
-                  )}
+                {/* Switcher: Automatic Proxy Bid vs Instant Bid */}
+                <div className="flex items-center gap-1 p-1 bg-surface-700/60 rounded-xl border border-white/5 text-xs font-600">
+                  <button
+                    id="tab-mode-proxy"
+                    type="button"
+                    onClick={() => setBidMode('proxy')}
+                    className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                      bidMode === 'proxy'
+                        ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/30'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <ShieldCheck size={13} />
+                    <span>Auto Proxy Bid</span>
+                  </button>
+                  <button
+                    id="tab-mode-manual"
+                    type="button"
+                    onClick={() => setBidMode('manual')}
+                    className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                      bidMode === 'manual'
+                        ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/30'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Gavel size={13} />
+                    <span>Instant Bid</span>
+                  </button>
                 </div>
+
+                {bidMode === 'proxy' ? (
+                  /* Automatic Proxy Bidding Form */
+                  <div className="flex flex-col gap-2.5 bg-brand-500/5 border border-brand-500/20 rounded-xl p-3.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-700 text-slate-200 flex items-center gap-1.5 uppercase tracking-wider">
+                        <Lock size={12} className="text-brand-400" />
+                        <span>Your Maximum Bid (₹)</span>
+                      </label>
+                      <span className="text-[11px] text-brand-300 font-600">
+                        Min next: ₹{minBid?.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        id="proxy-max-input"
+                        type="number"
+                        min={minBid}
+                        step={listing.minBidIncrement}
+                        value={proxyAmount}
+                        onChange={(e) => { setProxyAmount(e.target.value); setProxyError(''); }}
+                        className="input text-sm font-600"
+                        placeholder={`Min ₹${minBid}`}
+                      />
+                      <button
+                        id="set-proxy-btn"
+                        onClick={handleSetProxyBid}
+                        disabled={settingProxy || !user}
+                        className="btn btn-primary whitespace-nowrap flex items-center gap-1.5 text-xs py-2 px-3.5"
+                      >
+                        <ShieldCheck size={15} />
+                        {settingProxy ? 'Setting…' : proxyBid ? 'Update Max' : 'Set Maximum Bid'}
+                      </button>
+                    </div>
+
+                    {proxyError && (
+                      <p className="text-rose-400 text-xs flex items-center gap-1">
+                        <AlertTriangle size={12} /> {proxyError}
+                      </p>
+                    )}
+
+                    {/* Buyer Status & Commitment Feedback */}
+                    {proxyBid && (
+                      <div className="pt-2 border-t border-white/10 flex flex-col gap-1.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Your Private Maximum:</span>
+                          <span className="font-700 text-slate-100 flex items-center gap-1">
+                            <Lock size={11} className="text-brand-400" />
+                            ₹{proxyBid.maxAmount?.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Current Status:</span>
+                          {(user?._id && (listing.winner?._id === user._id || listing.winner === user._id)) ? (
+                            <span className="badge bg-emerald-400/15 text-emerald-400 border border-emerald-400/30 font-700 text-[11px] flex items-center gap-1">
+                              <CheckCircle size={11} /> You're leading!
+                            </span>
+                          ) : (
+                            <span className="badge bg-rose-400/15 text-rose-400 border border-rose-400/30 font-700 text-[11px] flex items-center gap-1">
+                              <AlertTriangle size={11} /> You've been outbid
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-[11px] text-slate-400 leading-relaxed bg-surface-800/40 p-2.5 rounded-lg border border-white/5">
+                      CampusBid will automatically bid on your behalf when needed, up to your maximum amount.
+                    </p>
+                  </div>
+                ) : (
+                  /* Manual Bid Form */
+                  <div>
+                    <label className="text-xs font-600 text-slate-300 uppercase tracking-wider mb-1.5 block">
+                      Your bid (min ₹{minBid?.toLocaleString()})
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="bid-amount-input"
+                        type="number"
+                        min={minBid}
+                        step={listing.minBidIncrement}
+                        value={bidAmount}
+                        onChange={(e) => { setBidAmount(e.target.value); setBidError(''); }}
+                        className="input"
+                        placeholder={`Min ₹${minBid}`}
+                      />
+                      <button
+                        id="place-bid-btn"
+                        onClick={placeBid}
+                        disabled={bidding || !user}
+                        className="btn btn-primary whitespace-nowrap"
+                      >
+                        <Gavel size={16} />
+                        {bidding ? 'Placing…' : 'Place Bid'}
+                      </button>
+                    </div>
+                    {bidError && (
+                      <p className="text-rose-400 text-xs mt-1.5 flex items-center gap-1">
+                        <AlertTriangle size={12} /> {bidError}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {!user && (
                   <p className="text-slate-500 text-xs">
                     <Link to="/login" className="text-brand-400">Log in</Link> to place a bid

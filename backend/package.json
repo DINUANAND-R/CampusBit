@@ -10,6 +10,8 @@
     "test:suite": "node test-suite.js",
     "test:multer": "node test-multer.js",
     "test:analytics": "node test-analytics-admin.js",
+    "test:exchange": "node test-exchange-workflow.js",
+    "test:proxy": "node test-proxy-bidding.js",
     "admin:promote": "node scripts/promote-admin.js"
   },
   "keywords": [],

@@ -58,6 +58,8 @@ export const bidsApi = {
   place: (listingId, amount) => api.post('/bids', { listingId, amount }),
   history: (listingId) => api.get(`/bids/listing/${listingId}`),
   myBids: () => api.get('/bids/my'),
+  getProxy: (listingId) => api.get(`/bids/listing/${listingId}/proxy`),
+  setProxy: (listingId, maxAmount) => api.post('/bids/proxy', { listingId, maxAmount }),
 };
 
 // ── Handover ──────────────────────────────────────────────────────────────────

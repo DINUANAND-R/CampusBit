@@ -101,6 +101,15 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/wanted-alerts', wantedAlertRoutes);
 app.use('/api/exchanges', exchangeRoutes);
 
+// ── Alternative Proxy Bids Route Convention ──────────────────────────────────
+const auctionProxyRouter = express.Router({ mergeParams: true });
+const bidCtrl = require('./controllers/bidController');
+const { protect } = require('./middleware/auth');
+auctionProxyRouter.post('/', protect, bidCtrl.setProxyBidHttp);
+auctionProxyRouter.get('/me', protect, bidCtrl.getProxyBidHttp);
+auctionProxyRouter.patch('/me', protect, bidCtrl.setProxyBidHttp);
+app.use('/api/auctions/:auctionId/proxy-bids', auctionProxyRouter);
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
