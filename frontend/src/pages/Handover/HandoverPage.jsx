@@ -15,17 +15,18 @@ export default function HandoverPage() {
   const [loading,  setLoading]  = useState(true);
   const [otp,      setOtp]      = useState('');
   const [reason,   setReason]   = useState('');
+  const [showRejectBox, setShowRejectBox] = useState(false);
   const [acting,   setActing]   = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [{ data: ld }, { data: hd }] = await Promise.all([
+      const [{ data: ld }, hdRes] = await Promise.all([
         listingsApi.getOne(id),
-        handoverApi.get(id),
+        handoverApi.get(id).catch(() => ({ data: { handover: null } })),
       ]);
       setListing(ld.listing);
-      setHandover(hd.handover);
+      setHandover(hdRes.data.handover);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load handover');
       navigate('/dashboard');
@@ -37,7 +38,7 @@ export default function HandoverPage() {
   useEffect(() => { load(); }, [id]);
 
   const isSeller = user?._id === listing?.seller?._id || user?._id === handover?.seller?._id;
-  const isBuyer  = user?._id === handover?.buyer?._id;
+  const isBuyer  = user?._id === listing?.winner?._id || user?._id === handover?.buyer?._id;
 
   const approve = async () => {
     setActing(true);
@@ -132,21 +133,38 @@ export default function HandoverPage() {
             <button id="approve-btn" onClick={approve} disabled={acting} className="btn btn-success flex-1">
               <CheckCircle size={16} /> Approve
             </button>
-            <button id="reject-btn" onClick={() => {}} className="btn btn-danger flex-1"
-              disabled={acting}>
-              <XCircle size={16} /> Reject
+            <button
+              id="reject-btn"
+              onClick={() => setShowRejectBox((v) => !v)}
+              className="btn btn-danger flex-1"
+              disabled={acting}
+            >
+              <XCircle size={16} /> {showRejectBox ? 'Cancel' : 'Reject'}
             </button>
           </div>
-          {/* Rejection reason */}
-          <div>
-            <label className="text-xs text-[#A1A79E] uppercase tracking-wider mb-1 block">Rejection reason (required to reject)</label>
-            <input className="input text-sm bg-[#151815] border-[#30372F] text-[#F4F5F0]" value={reason} onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Item damaged, buyer unreachable…" />
-            <button id="confirm-reject-btn" onClick={reject} disabled={acting || !reason.trim()}
-              className="btn btn-danger btn-sm mt-2 w-full">
-              Confirm rejection
-            </button>
-          </div>
+
+          {/* Rejection reason box */}
+          {showRejectBox && (
+            <div className="bg-[#151815] border border-[#30372F] rounded-xl p-4 flex flex-col gap-2 mt-2 animate-fade-in">
+              <label className="text-xs text-[#A1A79E] uppercase tracking-wider block">
+                Rejection reason (required to reject)
+              </label>
+              <input
+                className="input text-sm bg-[#101211] border-[#30372F] text-[#F4F5F0]"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="e.g. Item damaged, buyer unreachable…"
+              />
+              <button
+                id="confirm-reject-btn"
+                onClick={reject}
+                disabled={acting || !reason.trim()}
+                className="btn btn-danger btn-sm mt-1 w-full"
+              >
+                Confirm rejection & cancel sale
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -212,6 +230,17 @@ export default function HandoverPage() {
           <p className="text-[#A1A79E] text-sm">The seller needs to approve before handover can proceed.</p>
         </div>
       )}
+
+      {/* Link to Product Exchange dashboard */}
+      <div className="mt-8 text-center border-t border-[#30372F] pt-6">
+        <p className="text-xs text-[#747D72] mb-2">Want to arrange or view campus meeting details?</p>
+        <button
+          onClick={() => navigate('/exchange')}
+          className="btn btn-secondary btn-sm py-2 px-4 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+        >
+          🤝 Open Product Exchange & Meeting Dashboard →
+        </button>
+      </div>
     </div>
   );
 }

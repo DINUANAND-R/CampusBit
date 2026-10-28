@@ -1,5 +1,6 @@
 const Handover = require('../models/Handover');
 const Listing = require('../models/Listing');
+const Exchange = require('../models/Exchange');
 const crypto = require('crypto');
 
 // POST /api/handover/:listingId/approve  (seller)
@@ -10,11 +11,19 @@ exports.approve = async (req, res, next) => {
     if (listing.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Only seller can approve' });
     }
-    if (listing.status !== 'closed') {
-      return res.status(400).json({ message: 'Listing is not closed' });
+    if (listing.status !== 'closed' && listing.status !== 'completed') {
+      return res.status(400).json({ message: `Listing is ${listing.status}, not closed` });
     }
 
     let handover = await Handover.findOne({ listing: listing._id });
+    if (!handover && listing.winner) {
+      handover = await Handover.create({
+        listing: listing._id,
+        seller: listing.seller,
+        buyer: listing.winner,
+        finalPrice: listing.currentPrice,
+      });
+    }
     if (!handover) return res.status(404).json({ message: 'Handover record not found' });
     if (handover.sellerDecision !== 'pending') {
       return res.status(400).json({ message: `Already ${handover.sellerDecision}` });
@@ -57,6 +66,22 @@ exports.reject = async (req, res, next) => {
     listing.status = 'unsold';
     await listing.save();
 
+    // Cancel exchange if open
+    await Exchange.updateOne(
+      { listing: listing._id },
+      {
+        status: 'CANCELLED',
+        $push: {
+          history: {
+            actor: req.user._id,
+            action: 'EXCHANGE_CANCELLED_SELLER_REJECTED',
+            timestamp: new Date(),
+            note: req.body.reason || 'Seller rejected handover',
+          },
+        },
+      }
+    ).catch(() => {});
+
     res.json({ message: 'Rejected', handover });
   } catch (err) {
     next(err);
@@ -86,11 +111,31 @@ exports.confirm = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid handover code' });
     }
 
-    handover.completedAt = new Date();
+    const now = new Date();
+    handover.completedAt = now;
     await handover.save();
 
     listing.status = 'completed';
     await listing.save();
+
+    // Synchronize with rich Exchange model
+    await Exchange.updateOne(
+      { listing: listing._id },
+      {
+        status: 'COMPLETED',
+        sellerHandedOverAt: now,
+        buyerReceivedAt: now,
+        completedAt: now,
+        $push: {
+          history: {
+            actor: req.user._id,
+            action: 'HANDOVER_COMPLETED_VIA_OTP',
+            timestamp: now,
+            note: 'Handover successfully verified and completed via 6-digit OTP code',
+          },
+        },
+      }
+    ).catch(() => {});
 
     res.json({ message: 'Handover complete!', handover });
   } catch (err) {
@@ -101,10 +146,31 @@ exports.confirm = async (req, res, next) => {
 // GET /api/handover/:listingId
 exports.getHandover = async (req, res, next) => {
   try {
-    const handover = await Handover.findOne({ listing: req.params.listingId })
+    let handover = await Handover.findOne({ listing: req.params.listingId })
       .populate('seller', 'username')
       .populate('buyer', 'username');
-    if (!handover) return res.status(404).json({ message: 'No handover record' });
+
+    // If missing but listing has a winner and is closed/completed, auto-create
+    if (!handover) {
+      const listing = await Listing.findById(req.params.listingId)
+        .populate('seller', 'username')
+        .populate('winner', 'username');
+      if (listing && listing.winner && (listing.status === 'closed' || listing.status === 'completed')) {
+        handover = await Handover.create({
+          listing: listing._id,
+          seller: listing.seller._id || listing.seller,
+          buyer: listing.winner._id || listing.winner,
+          finalPrice: listing.currentPrice,
+          sellerDecision: listing.status === 'completed' ? 'approved' : 'pending',
+          completedAt: listing.status === 'completed' ? new Date() : null,
+        });
+        handover = await Handover.findById(handover._id)
+          .populate('seller', 'username')
+          .populate('buyer', 'username');
+      }
+    }
+
+    if (!handover) return res.status(404).json({ message: 'No handover record found for this listing' });
 
     // Hide code from buyer — only show after approval & only to seller
     const isSeller = handover.seller._id.toString() === req.user._id.toString();

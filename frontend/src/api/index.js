@@ -146,7 +146,7 @@ export const exchangesApi = {
   getOne: (id) => api.get(`/exchanges/${id}`),
   proposeHandover: (id, data) => api.post(`/exchanges/${id}/handover-proposals`, data),
   respondProposal: (id, proposalId, data) => api.patch(`/exchanges/${id}/handover-proposals/${proposalId}/respond`, data),
-  confirmHandover: (id) => api.post(`/exchanges/${id}/confirm-handover`),
+  confirmHandover: (id, role) => api.post(`/exchanges/${id}/confirm-handover`, role ? { role } : {}),
   raiseDispute: (id, data) => api.post(`/exchanges/${id}/disputes`, data),
   getHistory: (id) => api.get(`/exchanges/${id}/history`),
 };

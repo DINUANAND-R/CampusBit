@@ -199,7 +199,7 @@ export default function ExchangeDashboardPage() {
 
     setSubmitting(true);
     try {
-      const { data } = await exchangesApi.confirmHandover(exchange._id);
+      const { data } = await exchangesApi.confirmHandover(exchange._id, isBuyer ? 'buyer' : 'seller');
       toast.success(data.message || 'Confirmation recorded!');
       fetchExchanges(true);
     } catch (err) {
@@ -340,10 +340,15 @@ export default function ExchangeDashboardPage() {
 
             const hasProposal = Boolean(exchange.handoverProposal);
             const proposal = exchange.handoverProposal;
-            const isProposalRecipient =
+            const isProposalPending =
               hasProposal &&
-              proposal.status === 'PENDING' &&
-              proposal.proposedBy !== user?._id;
+              (proposal.status === 'PROPOSED' || proposal.status === 'PENDING');
+            const proposerId = String(proposal?.proposedById || proposal?.proposedBy?._id || proposal?.proposedBy || '');
+            const currentUserId = String(user?._id || '');
+            const isProposer =
+              proposerId === currentUserId ||
+              (proposal?.proposedRole ? (isBuyer && proposal.proposedRole === 'buyer') || (isSeller && proposal.proposedRole === 'seller') : false);
+            const isProposalRecipient = isProposalPending && !isProposer;
 
             return (
               <div
@@ -425,16 +430,18 @@ export default function ExchangeDashboardPage() {
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               proposal.status === 'ACCEPTED'
                                 ? 'bg-emerald-500/20 text-emerald-300'
-                                : proposal.status === 'REJECTED'
+                                : (proposal.status === 'REJECTED' || proposal.status === 'DECLINED')
                                 ? 'bg-rose-500/20 text-rose-300'
                                 : 'bg-amber-500/20 text-amber-300 animate-pulse'
                             }`}
                           >
                             {proposal.status === 'ACCEPTED'
                               ? 'Arrangement Agreed'
-                              : proposal.status === 'REJECTED'
+                              : (proposal.status === 'REJECTED' || proposal.status === 'DECLINED')
                               ? 'Arrangement Declined'
-                              : 'Proposal Pending'}
+                              : isProposer
+                              ? 'Awaiting Counterparty'
+                              : 'Proposal Received'}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
@@ -471,11 +478,21 @@ export default function ExchangeDashboardPage() {
                           </button>
                         </div>
                       )}
+
+                      {/* If declined and not completed, allow proposing a new meeting point */}
+                      {(proposal.status === 'REJECTED' || proposal.status === 'DECLINED') && exchange.status !== 'COMPLETED' && (
+                        <button
+                          onClick={() => handleOpenProposal(exchange)}
+                          className="btn btn-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"
+                        >
+                          <Plus size={14} /> Propose New Spot
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-between gap-3 text-xs text-slate-400">
                       <span>No campus handover location has been proposed yet.</span>
-                      {exchange.status === 'READY_TO_ARRANGE' && (
+                      {exchange.status !== 'COMPLETED' && exchange.status !== 'CANCELLED' && (
                         <button
                           onClick={() => handleOpenProposal(exchange)}
                           className="btn btn-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"

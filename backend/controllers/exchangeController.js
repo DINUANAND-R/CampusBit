@@ -1,4 +1,5 @@
 const Exchange = require('../models/Exchange');
+const Handover = require('../models/Handover');
 const Listing = require('../models/Listing');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
@@ -355,7 +356,12 @@ exports.confirmHandover = async (req, res, next) => {
 
       // Mark listing as completed
       if (exchange.listing) {
-        await Listing.updateOne({ _id: exchange.listing._id }, { status: 'completed' });
+        const listingId = exchange.listing._id || exchange.listing;
+        await Listing.updateOne({ _id: listingId }, { status: 'completed' });
+        await Handover.updateOne(
+          { listing: listingId },
+          { sellerDecision: 'approved', completedAt: now }
+        ).catch(() => {});
       }
     } else {
       exchange.status = 'HANDED_OVER';
