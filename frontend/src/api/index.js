@@ -127,4 +127,15 @@ export const notificationsApi = {
   markAllRead: () => api.patch('/notifications/read-all'),
 };
 
+// ── Wanted Alerts ─────────────────────────────────────────────────────────────
+export const wantedAlertsApi = {
+  getAll: (params) => api.get('/wanted-alerts', { params }),
+  getOne: (id) => api.get(`/wanted-alerts/${id}`),
+  create: (data) => api.post('/wanted-alerts', data),
+  update: (id, data) => api.patch(`/wanted-alerts/${id}`, data),
+  updateStatus: (id, data) => api.patch(`/wanted-alerts/${id}/status`, data),
+  delete: (id) => api.delete(`/wanted-alerts/${id}`),
+  getMatches: (id) => api.get(`/wanted-alerts/${id}/matches`),
+};
+
 export default api;

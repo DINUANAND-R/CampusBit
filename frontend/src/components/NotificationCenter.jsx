@@ -315,6 +315,7 @@ export default function NotificationCenter() {
             ) : (
               notifications.map((notif) => {
                 const isNewListing = notif.type === 'NEW_LISTING';
+                const isWantedMatch = notif.type === 'WANTED_ALERT_MATCH';
                 return (
                   <div
                     key={notif._id}
@@ -322,6 +323,8 @@ export default function NotificationCenter() {
                     className={`p-3 transition-colors cursor-pointer flex gap-3 items-start group ${
                       notif.isRead
                         ? 'hover:bg-white/[0.03] opacity-80 hover:opacity-100'
+                        : isWantedMatch
+                        ? 'bg-amber-500/10 hover:bg-amber-500/15 border-l-2 border-amber-400'
                         : 'bg-brand-500/10 hover:bg-brand-500/15 border-l-2 border-brand-500'
                     }`}
                   >
@@ -336,25 +339,38 @@ export default function NotificationCenter() {
                       ) : (
                         <div
                           className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                            isNewListing
+                            isWantedMatch
+                              ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                              : isNewListing
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                               : 'bg-brand-500/10 text-brand-400 border-brand-500/20'
                           }`}
                         >
-                          {isNewListing ? <Tag size={18} /> : <MessageSquare size={18} />}
+                          {isWantedMatch ? <Sparkles size={18} /> : isNewListing ? <Tag size={18} /> : <MessageSquare size={18} />}
                         </div>
                       )}
                       {!notif.isRead && (
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-400 ring-2 ring-slate-900" />
+                        <span
+                          className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ring-2 ring-slate-900 ${
+                            isWantedMatch ? 'bg-amber-400' : 'bg-brand-400'
+                          }`}
+                        />
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
-                          {notif.title}
-                        </span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {isWantedMatch && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                              Wanted Match
+                            </span>
+                          )}
+                          <span className="text-xs font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
+                            {notif.title}
+                          </span>
+                        </div>
                         <span className="text-[10px] text-slate-500 shrink-0 flex items-center gap-0.5">
                           <Clock size={10} />
                           {formatTimeAgo(notif.createdAt)}
@@ -430,8 +446,18 @@ export default function NotificationCenter() {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-400">
-                New Product Listed
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                  toast.type === 'WANTED_ALERT_MATCH' ? 'text-amber-400' : 'text-brand-400'
+                }`}
+              >
+                {toast.type === 'WANTED_ALERT_MATCH' ? (
+                  <>
+                    <Sparkles size={12} /> Wanted Alert Matched!
+                  </>
+                ) : (
+                  'New Product Listed'
+                )}
               </span>
               <button
                 onClick={() => setToast(null)}

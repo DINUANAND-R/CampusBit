@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 import SellerAnalyticsView from './SellerAnalyticsView';
+import WantedAlertsView from './WantedAlertsView';
 
 const statusColor = {
   active:    'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
@@ -123,6 +124,7 @@ export default function DashboardPage() {
       <div className="flex gap-2 mb-6 border-b border-surface-600 pb-4">
         {[
           { id: 'listings', label: '📦 My Listings' },
+          { id: 'wanted_alerts', label: '🔔 Wanted Alerts' },
           { id: 'analytics', label: '📊 Seller Analytics' },
           { id: 'bids', label: '🔨 My Bids' },
         ].map(({ id, label }) => (
@@ -314,6 +316,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+      ) : tab === 'wanted_alerts' ? (
+        <WantedAlertsView />
       ) : tab === 'analytics' ? (
         <SellerAnalyticsView />
       ) : (

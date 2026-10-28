@@ -16,6 +16,7 @@ const reportRoutes = require('./routes/reports');
 const conversationRoutes = require('./routes/conversations');
 const itemRequestRoutes = require('./routes/itemRequests');
 const notificationRoutes = require('./routes/notifications');
+const wantedAlertRoutes = require('./routes/wantedAlerts');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
 const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
@@ -96,6 +97,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/item-requests', itemRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/wanted-alerts', wantedAlertRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

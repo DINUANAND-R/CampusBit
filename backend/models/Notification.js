@@ -23,6 +23,7 @@ const notificationSchema = new mongoose.Schema(
         'bid',
         'system',
         'NEW_LISTING',
+        'WANTED_ALERT_MATCH',
       ],
       default: 'message',
       required: true,
@@ -57,6 +58,11 @@ const notificationSchema = new mongoose.Schema(
     listing: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Listing',
+      default: null,
+    },
+    wantedAlert: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'WantedAlert',
       default: null,
     },
     isRead: {

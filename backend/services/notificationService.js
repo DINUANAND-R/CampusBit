@@ -2,6 +2,7 @@ const Listing = require('../models/Listing');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const NotificationJob = require('../models/NotificationJob');
+const { matchListingAgainstWantedAlerts } = require('./wantedAlertService');
 
 let globalIO = null;
 
@@ -80,6 +81,9 @@ const queueNewListingNotification = async (listingDocOrId, ioInstance = null) =>
     setImmediate(() => {
       processNotificationJob(job._id, io).catch((err) => {
         console.error(`[NotificationService] Error executing job ${job._id}:`, err);
+      });
+      matchListingAgainstWantedAlerts(listing._id, io).catch((err) => {
+        console.error(`[NotificationService] Error matching wanted alerts for ${listing._id}:`, err);
       });
     });
 
