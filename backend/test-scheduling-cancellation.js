@@ -166,7 +166,7 @@ async function runSchedulingCancellationTests() {
     );
 
     // Now it appears in public feed
-    const publicAfterPub = await api('/listings?limit=100');
+    const publicAfterPub = await api('/listings?sort=newest&limit=100');
     const foundAfterPub = publicAfterPub.data.listings?.some((l) => l._id === scheduledListingId);
     assert('Published listing is now visible in public browsing and search', foundAfterPub);
 

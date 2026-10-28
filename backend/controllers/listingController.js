@@ -115,10 +115,26 @@ exports.createListing = async (req, res, next) => {
     } = req.body;
 
     // 1. Process uploaded files from Multer
-    const uploadedImages = (req.files || []).map((file) => ({
+    const rawImageFiles = req.files?.images || (Array.isArray(req.files) ? req.files.filter((f) => f.fieldname === 'images' || !f.fieldname) : []);
+    const rawVideoFiles = req.files?.video || (Array.isArray(req.files) ? req.files.filter((f) => f.fieldname === 'video') : []);
+
+    const uploadedImages = rawImageFiles.map((file) => ({
       url: `/uploads/listings/${file.filename}`,
       filename: file.filename,
     }));
+
+    let videoData = null;
+    if (rawVideoFiles.length > 0) {
+      const vFile = rawVideoFiles[0];
+      videoData = {
+        url: `/uploads/listings/${vFile.filename}`,
+        filename: vFile.filename,
+        mimeType: vFile.videoMeta?.mimeType || vFile.mimetype || 'video/mp4',
+        size: vFile.size || 0,
+        duration: vFile.videoMeta?.duration ?? null,
+        posterUrl: '',
+      };
+    }
 
     // 2. Process any JSON/string image URLs (e.g. from tests or external input)
     let bodyImages = [];
@@ -214,6 +230,7 @@ exports.createListing = async (req, res, next) => {
       category: category ? category.toLowerCase().trim() : 'other',
       condition: condition ? condition.toLowerCase().trim().replace(/\s+/g, '-') : 'good',
       images: allImages,
+      video: videoData,
       startingPrice: Number(startingPrice),
       reservePrice: reservePrice ? Number(reservePrice) : null,
       minBidIncrement: minBidIncrement ? Number(minBidIncrement) : 10,
@@ -345,7 +362,10 @@ exports.updateListing = async (req, res, next) => {
     }
 
     // Process newly uploaded files
-    const newImages = (req.files || []).map((file) => ({
+    const rawImageFiles = req.files?.images || (Array.isArray(req.files) ? req.files.filter((f) => f.fieldname === 'images' || !f.fieldname) : []);
+    const rawVideoFiles = req.files?.video || (Array.isArray(req.files) ? req.files.filter((f) => f.fieldname === 'video') : []);
+
+    const newImages = rawImageFiles.map((file) => ({
       url: `/uploads/listings/${file.filename}`,
       filename: file.filename,
     }));
@@ -359,6 +379,30 @@ exports.updateListing = async (req, res, next) => {
     if (finalImages.length > 5) {
       await deleteUploadedFiles(req.files);
       return res.status(400).json({ message: 'Maximum 5 images allowed per listing' });
+    }
+
+    // Process video update (replace, remove, or retain)
+    let updatedVideo = listing.video;
+    let oldVideoToClean = null;
+
+    if (rawVideoFiles.length > 0) {
+      const vFile = rawVideoFiles[0];
+      if (listing.video?.filename) {
+        oldVideoToClean = listing.video.filename;
+      }
+      updatedVideo = {
+        url: `/uploads/listings/${vFile.filename}`,
+        filename: vFile.filename,
+        mimeType: vFile.videoMeta?.mimeType || vFile.mimetype || 'video/mp4',
+        size: vFile.size || 0,
+        duration: vFile.videoMeta?.duration ?? null,
+        posterUrl: '',
+      };
+    } else if (req.body.removeVideo === 'true' || req.body.removeVideo === true) {
+      if (listing.video?.filename) {
+        oldVideoToClean = listing.video.filename;
+      }
+      updatedVideo = null;
     }
 
     // Determine removed files to delete from disk after DB update succeeds
@@ -377,6 +421,7 @@ exports.updateListing = async (req, res, next) => {
     });
 
     listing.images = finalImages;
+    listing.video = updatedVideo;
     await listing.save();
 
     // Delete removed files from disk only after successful DB update
@@ -384,6 +429,9 @@ exports.updateListing = async (req, res, next) => {
       if (removed.filename) {
         await deleteListingFile(removed.filename);
       }
+    }
+    if (oldVideoToClean) {
+      await deleteListingFile(oldVideoToClean);
     }
 
     res.json({ listing });
@@ -477,16 +525,21 @@ exports.deleteListing = async (req, res, next) => {
       return res.status(400).json({ message: 'Cannot delete a listing with active bids' });
     }
 
-    // Remove associated image files from disk
-    if (listing.images && Array.isArray(listing.images)) {
-      for (const img of listing.images) {
-        if (img.filename) {
-          await deleteListingFile(img.filename);
-        }
-      }
-    }
+    const imagesToDelete = (listing.images && Array.isArray(listing.images)) ? [...listing.images] : [];
+    const videoToDelete = listing.video?.filename;
 
     await listing.deleteOne();
+
+    // Remove associated image files and video from disk after DB deletion
+    for (const img of imagesToDelete) {
+      if (img.filename) {
+        await deleteListingFile(img.filename);
+      }
+    }
+    if (videoToDelete) {
+      await deleteListingFile(videoToDelete);
+    }
+
     res.json({ message: 'Listing deleted' });
   } catch (err) {
     next(err);

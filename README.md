@@ -60,11 +60,15 @@ Dedicated **My Transactions / Product Exchange** hub for physical handovers afte
 - **Dispute Resolution & Audit Trail**: Full chronological history with actors, timestamps, and notes, plus administrative dispute review.
 - **Linked Private Chat**: Dedicated private conversation automatically provisioned for every exchange.
 
-### 3. 🖼️ Multi-Image Upload with Multer
-- Upload up to 5 device photos per listing (`JPEG, JPG, PNG, WebP`).
-- Drag-and-drop file picker with instant client-side image preview and removal.
-- **Deep Security Validation**: Magic-bytes header verification blocks disguised executable files.
-- **Storage Management**: Server-side disk cleanup removes replaced or deleted images to prevent orphaned storage bloat.
+### 3. 🖼️ Multi-Image & Video Upload with Multer
+- **Multi-Photo Upload**: Upload up to 5 device photos per listing (`JPEG, JPG, PNG, WebP`).
+- **Product Video Upload**: Sellers can optionally attach 1 product video clip (`MP4` or `WebM`, max 50 MB, up to 60 seconds duration).
+- **Deep Signature Inspection**:
+  - Image magic-bytes validation (blocks disguised executables).
+  - Video signature checking: validates MP4 `ftyp` box and WebM EBML headers.
+  - Server-side duration inspection: extracts video duration from box headers (`moov/mvhd` in MP4 and EBML `Info Duration` in WebM) and strictly enforces the 60s limit with zero paid APIs.
+- **Buyer Gallery Player**: Native HTML5 video player embedded directly in the listing gallery with custom play icon, thumbnail switching, and `preload="metadata"` range streaming.
+- **Storage Management**: Server-side disk cleanup safely removes replaced, removed, or deleted video and image files without orphaning or deleting shared files.
 
 ### 4. 📅 Scheduled Listings & Cancellation Policy
 - **Publish Now or Schedule Later**: Sellers can set a future publication date and time.
@@ -214,10 +218,11 @@ node scripts/promote-admin.js <user-email-or-username>
 
 ## 🧪 Automated Test Suites
 
-The project features **8 automated end-to-end test suites** with **285 assertions** verifying business logic, access control, concurrency, proxy pricing, and real-time Socket.IO synchronization:
+The project features **9 automated end-to-end test suites** with **318+ assertions** verifying business logic, access control, concurrency, proxy pricing, product video media streaming, and real-time Socket.IO synchronization:
 
 | Test Suite | Purpose | Command |
 | :--- | :--- | :--- |
+| **Product Video Upload & Playback** | MP4/WebM validation, duration inspection, range streaming, cleanup | `node test-video-upload.js` |
 | **Automatic Proxy Bidding** | Incremental auto-bids, tie-breaking, privacy, manual bid counters | `node test-proxy-bidding.js` |
 | **Product Exchange Workflow** | Handover proposals, two-party confirmation, disputes, idempotency | `node test-exchange-workflow.js` |
 | **Smart Wanted Alerts** | Keyword/budget matching, offline notifications, student privacy | `node test-wanted-alerts.js` |
@@ -230,6 +235,7 @@ The project features **8 automated end-to-end test suites** with **285 assertion
 To run the complete test suite:
 ```bash
 cd backend
+node test-video-upload.js
 node test-proxy-bidding.js
 node test-exchange-workflow.js
 node test-wanted-alerts.js

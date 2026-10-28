@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingsApi } from '../../api';
 import ImageUpload from '../../components/ImageUpload';
+import VideoUpload from '../../components/VideoUpload';
 import toast from 'react-hot-toast';
 import { Info, Loader, Calendar, Clock, Zap } from 'lucide-react';
 
@@ -33,6 +34,7 @@ export default function CreateListingPage() {
   const [publishType, setPublishType] = useState('now'); // 'now' | 'later'
   const [scheduledAt, setScheduledAt] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -177,6 +179,11 @@ export default function CreateListingPage() {
       selectedFiles.forEach((file) => {
         formData.append('images', file);
       });
+
+      // Append optional video file under the "video" field name
+      if (selectedVideo) {
+        formData.append('video', selectedVideo);
+      }
 
       const { data } = await listingsApi.create(formData);
       const isSched = data.listing?.status === 'scheduled';
@@ -475,6 +482,15 @@ export default function CreateListingPage() {
             newFiles={selectedFiles}
             onNewFilesChange={setSelectedFiles}
             maxImages={5}
+            disabled={loading}
+          />
+        </div>
+
+        {/* Product Video Upload Component (Optional) */}
+        <div className="glass rounded-2xl p-6">
+          <VideoUpload
+            selectedFile={selectedVideo}
+            onFileChange={setSelectedVideo}
             disabled={loading}
           />
         </div>

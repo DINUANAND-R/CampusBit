@@ -9,9 +9,9 @@ import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
   Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare, Handshake,
-  ShieldCheck, Lock, Sparkles
+  ShieldCheck, Lock, Sparkles, Play, Film
 } from 'lucide-react';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getVideoUrl } from '../../utils/imageUrl';
 
 const conditionBadge = {
   new:        'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
@@ -48,6 +48,8 @@ export default function ListingDetailPage() {
   const [settingProxy, setSettingProxy] = useState(false);
   const [proxyError, setProxyError] = useState('');
   const [bidMode, setBidMode] = useState('proxy'); // 'proxy' or 'manual'
+  const [activeMedia, setActiveMedia] = useState('image'); // 'image' | 'video'
+  const [videoError, setVideoError] = useState(false);
 
   const bidListRef = useRef(null);
 
@@ -383,9 +385,41 @@ export default function ListingDetailPage() {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Left — image gallery + details */}
         <div className="flex flex-col gap-4">
-          {/* Main Image viewer */}
+          {/* Main Image/Video viewer */}
           <div className="glass rounded-2xl overflow-hidden h-72 sm:h-96 flex items-center justify-center relative bg-surface-800">
-            {images.length > 0 ? (
+            {activeMedia === 'video' && listing.video ? (
+              <div className="w-full h-full relative bg-black flex items-center justify-center">
+                {!videoError ? (
+                  <video
+                    key={listing.video.url}
+                    src={getVideoUrl(listing.video)}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={listing.video.posterUrl ? getImageUrl(listing.video.posterUrl) : undefined}
+                    className="w-full h-full object-contain"
+                    onError={() => setVideoError(true)}
+                  >
+                    Your browser does not support HTML video playback.
+                  </video>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 p-6 text-center text-slate-400">
+                    <Film size={36} className="text-slate-500" />
+                    <p className="text-sm font-600 text-slate-300">Video playback unavailable</p>
+                    <p className="text-xs text-slate-500">The video file could not be loaded.</p>
+                    <button
+                      onClick={() => {
+                        setVideoError(false);
+                        setActiveMedia('image');
+                      }}
+                      className="btn btn-secondary btn-sm text-xs mt-2"
+                    >
+                      View Photos
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : images.length > 0 ? (
               <img
                 src={getImageUrl(images[imgIdx])}
                 alt={listing.title}
@@ -397,25 +431,44 @@ export default function ListingDetailPage() {
                 }}
               />
             ) : null}
+
             <div
               className={`detail-fallback w-full h-full items-center justify-center text-7xl ${
-                images.length > 0 ? 'hidden' : 'flex'
+                activeMedia === 'image' && images.length === 0 ? 'flex' : 'hidden'
               }`}
             >
               {categoryEmoji[listing.category] || '📦'}
             </div>
+
+            {/* Floating button to watch video when viewing image */}
+            {listing.video && activeMedia === 'image' && (
+              <button
+                onClick={() => setActiveMedia('video')}
+                className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-full bg-surface-900/90 backdrop-blur border border-brand-500/30 text-xs font-600 text-slate-200 flex items-center gap-1.5 shadow-xl hover:bg-surface-800 transition-all hover:scale-105"
+                title="Watch product video"
+              >
+                <Play size={12} className="fill-brand-400 text-brand-400 ml-0.5" />
+                <span>Play Video</span>
+                {listing.video.duration && (
+                  <span className="text-[10px] text-slate-400 font-mono">({Math.round(listing.video.duration)}s)</span>
+                )}
+              </button>
+            )}
           </div>
 
-          {/* Thumbnails row */}
-          {images.length > 1 && (
+          {/* Thumbnails row (images + video) */}
+          {(images.length > 1 || listing.video) && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
               {images.map((img, i) => {
                 const src = getImageUrl(img);
-                const isSelected = i === imgIdx;
+                const isSelected = activeMedia === 'image' && i === imgIdx;
                 return (
                   <button
                     key={i}
-                    onClick={() => setImgIdx(i)}
+                    onClick={() => {
+                      setActiveMedia('image');
+                      setImgIdx(i);
+                    }}
                     className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
                       isSelected
                         ? 'border-brand-400 ring-2 ring-brand-400/30'
@@ -430,6 +483,26 @@ export default function ListingDetailPage() {
                   </button>
                 );
               })}
+
+              {/* Video Thumbnail Button */}
+              {listing.video && (
+                <button
+                  onClick={() => setActiveMedia('video')}
+                  className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all bg-surface-900 flex flex-col items-center justify-center gap-0.5 group ${
+                    activeMedia === 'video'
+                      ? 'border-brand-400 ring-2 ring-brand-400/30'
+                      : 'border-white/10 opacity-70 hover:opacity-100'
+                  }`}
+                  title="Play product video"
+                >
+                  <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Play size={12} className="fill-brand-400 ml-0.5" />
+                  </div>
+                  <span className="text-[9px] font-700 tracking-wider text-slate-300 uppercase">
+                    Video
+                  </span>
+                </button>
+              )}
             </div>
           )}
 

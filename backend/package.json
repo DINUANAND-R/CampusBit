@@ -12,6 +12,7 @@
     "test:analytics": "node test-analytics-admin.js",
     "test:exchange": "node test-exchange-workflow.js",
     "test:proxy": "node test-proxy-bidding.js",
+    "test:video": "node test-video-upload.js",
     "admin:promote": "node scripts/promote-admin.js"
   },
   "keywords": [],

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { listingsApi, bidsApi } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import ImageUpload from '../../components/ImageUpload';
+import VideoUpload from '../../components/VideoUpload';
 import toast from 'react-hot-toast';
 import { Info, Loader, ArrowLeft, Calendar, Clock } from 'lucide-react';
 
@@ -28,6 +29,9 @@ export default function EditListingPage() {
   const [endsAt, setEndsAt] = useState('');
   const [existingImages, setExistingImages] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
+  const [existingVideo, setExistingVideo] = useState(null);
+  const [newVideoFile, setNewVideoFile] = useState(null);
+  const [hadInitialVideo, setHadInitialVideo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -94,8 +98,12 @@ export default function EditListingPage() {
           minBidIncrement: listing.minBidIncrement ? String(listing.minBidIncrement) : '10',
         });
 
-        // Set existing images
+        // Set existing images and video
         setExistingImages(listing.images || []);
+        if (listing.video) {
+          setExistingVideo(listing.video);
+          setHadInitialVideo(true);
+        }
       } catch (err) {
         toast.error('Failed to load listing for editing.');
         navigate('/dashboard');
@@ -177,6 +185,13 @@ export default function EditListingPage() {
       newFiles.forEach((file) => {
         formData.append('images', file);
       });
+
+      // Handle video replacement, removal, or retention
+      if (newVideoFile) {
+        formData.append('video', newVideoFile);
+      } else if (hadInitialVideo && !existingVideo) {
+        formData.append('removeVideo', 'true');
+      }
 
       await listingsApi.update(id, formData);
       toast.success('Listing updated successfully!');
@@ -376,6 +391,17 @@ export default function EditListingPage() {
             newFiles={newFiles}
             onNewFilesChange={setNewFiles}
             maxImages={5}
+            disabled={saving}
+          />
+        </div>
+
+        {/* Product Video Management (Optional) */}
+        <div className="glass rounded-2xl p-6">
+          <VideoUpload
+            existingVideo={existingVideo}
+            onExistingVideoChange={setExistingVideo}
+            selectedFile={newVideoFile}
+            onFileChange={setNewVideoFile}
             disabled={saving}
           />
         </div>

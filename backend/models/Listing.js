@@ -8,6 +8,18 @@ const imageSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const videoSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    filename: { type: String, default: '' },
+    mimeType: { type: String, default: 'video/mp4' },
+    size: { type: Number, default: 0 },
+    duration: { type: Number, default: null },
+    posterUrl: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const listingSchema = new mongoose.Schema(
   {
     seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -38,6 +50,10 @@ const listingSchema = new mongoose.Schema(
         message: 'A listing must have between 1 and 5 images',
       },
       default: [],
+    },
+    video: {
+      type: videoSchema,
+      default: null,
     },
     startingPrice: { type: Number, required: true, min: 1 },
     reservePrice: { type: Number, default: null }, // null = no reserve

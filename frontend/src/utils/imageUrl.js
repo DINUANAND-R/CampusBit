@@ -22,4 +22,20 @@ export function getImageUrl(image) {
   return `${BACKEND_BASE}/${raw}`;
 }
 
+export function getVideoUrl(video) {
+  if (!video) return null;
+  const raw = typeof video === 'string' ? video : video.url;
+  if (!raw || typeof raw !== 'string') return null;
+
+  if (/^(https?:|\/\/|blob:|data:)/i.test(raw)) {
+    return raw;
+  }
+
+  if (raw.startsWith('/')) {
+    return `${BACKEND_BASE}${raw}`;
+  }
+
+  return `${BACKEND_BASE}/${raw}`;
+}
+
 export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80';
