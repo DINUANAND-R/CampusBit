@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { conversationsApi } from '../api';
 import NotificationCenter from './NotificationCenter';
-import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare, Handshake } from 'lucide-react';
+import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare, Handshake, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -73,6 +73,16 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
+          <Link
+            to="/assistant"
+            id="nav-assistant-link"
+            className="btn btn-secondary btn-sm flex items-center gap-1.5 border-brand-500/30 text-brand-300 hover:text-white hover:border-brand-400"
+            title="CampusBid AI Shopping Assistant"
+          >
+            <Sparkles size={14} className="text-brand-400 animate-pulse" />
+            <span className="hidden sm:inline font-600">AI Assistant</span>
+          </Link>
+
           {user ? (
             <>
               <Link to="/listings/new" className="btn btn-primary btn-sm">

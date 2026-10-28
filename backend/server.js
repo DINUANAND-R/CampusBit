@@ -18,6 +18,7 @@ const itemRequestRoutes = require('./routes/itemRequests');
 const notificationRoutes = require('./routes/notifications');
 const wantedAlertRoutes = require('./routes/wantedAlerts');
 const exchangeRoutes = require('./routes/exchanges');
+const assistantRoutes = require('./routes/assistant');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
 const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
@@ -100,6 +101,7 @@ app.use('/api/item-requests', itemRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/wanted-alerts', wantedAlertRoutes);
 app.use('/api/exchanges', exchangeRoutes);
+app.use('/api/assistant', assistantRoutes);
 
 // ── Alternative Proxy Bids Route Convention ──────────────────────────────────
 const auctionProxyRouter = express.Router({ mergeParams: true });

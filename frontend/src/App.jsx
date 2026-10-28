@@ -19,6 +19,7 @@ import AdminReportsPage    from './pages/Admin/AdminReportsPage';
 import AdminAnalyticsPage  from './pages/Admin/AdminAnalyticsPage';
 import CampusChatPage      from './pages/Chat/CampusChatPage';
 import ExchangeDashboardPage from './pages/Exchange/ExchangeDashboardPage';
+import AssistantPage         from './pages/Assistant/AssistantPage';
 import './App.css';
 
 // Auth guard
@@ -57,6 +58,7 @@ function AppRoutes() {
       <main>
         <Routes>
           <Route path="/"                 element={<BrowsePage />} />
+          <Route path="/assistant"        element={<AssistantPage />} />
           <Route path="/login"            element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/register"         element={<GuestRoute><RegisterPage /></GuestRoute>} />
           <Route path="/listings/:id"     element={<ListingDetailPage />} />

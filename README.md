@@ -88,6 +88,13 @@ Dedicated **My Transactions / Product Exchange** hub for physical handovers afte
 - **Seller Dashboard**: Revenue metrics, active listings, bid counts, daily view trends, and individual listing performance metrics.
 - **Admin Command Center**: System-wide statistics, user management (suspend, reinstate, promote/demote roles), listing moderation (hide, review, unhide), and user report resolution.
 
+### 4. 🤖 Rule-Based AI Shopping Assistant (Zero External APIs / No LLM)
+- **Natural Language Parsing**: Deterministic keyword extraction, currency interpretation (`₹2,000`, `2000`, `2k`, `15 thousand`), budget boundaries (`under`, `below`, `within`, `up to`, `between X and Y`), condition detection, and taxonomy synonyms (cycle $\rightarrow$ bicycle, laptop $\rightarrow$ notebook, mobile $\rightarrow$ smartphone).
+- **Live Database Discovery**: Queries active MongoDB listings with strict public visibility rules (excluding unpublished, scheduled, and cancelled listings).
+- **Side-by-Side Product Comparison**: Generates objective comparison breakdowns comparing price differences, condition ratings, bid counts, and remaining time.
+- **Guided Proxy Bidding with Explicit Approval**: Never bids automatically; provides step-by-step guidance and requires explicit student confirmation before submitting to the authenticated proxy bidding engine.
+- **Real-Time Synchronized State**: Updates displayed prices and auction statuses dynamically via Socket.IO events (`auction:bid_update`, `auction:status`) without page reloads.
+
 ---
 
 ## 🛠️ Tech Stack
@@ -222,6 +229,7 @@ The project features **9 automated end-to-end test suites** with **318+ assertio
 
 | Test Suite | Purpose | Command |
 | :--- | :--- | :--- |
+| **Rule-Based AI Assistant** | Regex currency/budget parsing, synonyms, live DB queries, comparisons | `node test-ai-assistant.js` |
 | **Product Video Upload & Playback** | MP4/WebM validation, duration inspection, range streaming, cleanup | `node test-video-upload.js` |
 | **Automatic Proxy Bidding** | Incremental auto-bids, tie-breaking, privacy, manual bid counters | `node test-proxy-bidding.js` |
 | **Product Exchange Workflow** | Handover proposals, two-party confirmation, disputes, idempotency | `node test-exchange-workflow.js` |
@@ -235,6 +243,7 @@ The project features **9 automated end-to-end test suites** with **318+ assertio
 To run the complete test suite:
 ```bash
 cd backend
+node test-ai-assistant.js
 node test-video-upload.js
 node test-proxy-bidding.js
 node test-exchange-workflow.js

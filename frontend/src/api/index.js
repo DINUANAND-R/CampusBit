@@ -151,4 +151,10 @@ export const exchangesApi = {
   getHistory: (id) => api.get(`/exchanges/${id}/history`),
 };
 
+// ── AI Assistant ─────────────────────────────────────────────────────────────
+export const assistantApi = {
+  chat: (message, context) => api.post('/assistant/chat', { message, context }),
+  compare: (listingIds) => api.post('/assistant/compare', { listingIds }),
+};
+
 export default api;
