@@ -227,13 +227,13 @@ export default function CreateListingPage() {
 
       <form onSubmit={submit} className="flex flex-col gap-6">
         {/* Item Details */}
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 text-lg mb-1">Item details</h2>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] text-lg mb-1">Item details</h2>
 
           {field('Title',
             <input
               id="listing-title"
-              className="input"
+              className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
               maxLength={120}
               required
               disabled={loading}
@@ -246,7 +246,7 @@ export default function CreateListingPage() {
           {field('Description',
             <textarea
               id="listing-desc"
-              className="input min-h-28 resize-y"
+              className="input min-h-28 resize-y bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
               maxLength={2000}
               required
               disabled={loading}
@@ -260,7 +260,7 @@ export default function CreateListingPage() {
             {field('Category',
               <select
                 id="listing-category"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 disabled={loading}
                 value={form.category}
                 onChange={set('category')}
@@ -273,7 +273,7 @@ export default function CreateListingPage() {
             {field('Condition',
               <select
                 id="listing-condition"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 disabled={loading}
                 value={form.condition}
                 onChange={set('condition')}
@@ -287,15 +287,15 @@ export default function CreateListingPage() {
         </div>
 
         {/* Pricing & Duration */}
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 text-lg mb-1">Pricing & duration</h2>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] text-lg mb-1">Pricing & duration</h2>
 
           <div className="grid grid-cols-2 gap-4">
             {field('Starting price (₹)',
               <input
                 id="listing-start-price"
                 type="number"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums"
                 min={1}
                 required
                 disabled={loading}
@@ -308,7 +308,7 @@ export default function CreateListingPage() {
               <input
                 id="listing-reserve"
                 type="number"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums"
                 min={1}
                 disabled={loading}
                 value={form.reservePrice}
@@ -324,7 +324,7 @@ export default function CreateListingPage() {
               <input
                 id="listing-increment"
                 type="number"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums"
                 min={1}
                 disabled={loading}
                 value={form.minBidIncrement}
@@ -335,7 +335,7 @@ export default function CreateListingPage() {
             {field('Auction Duration / End Time',
               <select
                 id="listing-duration"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 disabled={loading}
                 value={form.durationHours}
                 onChange={(e) =>
@@ -363,7 +363,7 @@ export default function CreateListingPage() {
                   min={publishType === 'later' && scheduledAt ? scheduledAt : getMinDatetime()}
                   value={form.customEndsAt}
                   onChange={set('customEndsAt')}
-                  className="input"
+                  className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                   required
                 />,
                 'Must be strictly after the publication date and time'
@@ -373,8 +373,8 @@ export default function CreateListingPage() {
         </div>
 
         {/* Publication Options: Publish Now vs Schedule */}
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 text-lg mb-1">Publication schedule</h2>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] text-lg mb-1">Publication schedule</h2>
 
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -383,14 +383,14 @@ export default function CreateListingPage() {
               onClick={() => setPublishType('now')}
               className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3 ${
                 publishType === 'now'
-                  ? 'border-brand-400 bg-brand-500/10 ring-1 ring-brand-400/40 text-slate-100'
-                  : 'border-surface-600 bg-surface-700/30 text-slate-400 hover:border-slate-500'
+                  ? 'border-[#C6FF4D] bg-[#C6FF4D]/10 ring-1 ring-[#C6FF4D]/40 text-[#F4F5F0]'
+                  : 'border-[#30372F] bg-[#151815] text-[#A1A79E] hover:border-[#C6FF4D]/40'
               }`}
             >
-              <Zap size={20} className={publishType === 'now' ? 'text-brand-400' : 'text-slate-500'} />
+              <Zap size={20} className={publishType === 'now' ? 'text-[#C6FF4D]' : 'text-[#747D72]'} />
               <div>
                 <p className="font-600 text-sm">Publish Now</p>
-                <p className="text-xs text-slate-400 mt-0.5">Auction starts immediately after creation</p>
+                <p className="text-xs text-[#A1A79E] mt-0.5">Auction starts immediately after creation</p>
               </div>
             </button>
 
@@ -403,21 +403,21 @@ export default function CreateListingPage() {
               }}
               className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3 ${
                 publishType === 'later'
-                  ? 'border-brand-400 bg-brand-500/10 ring-1 ring-brand-400/40 text-slate-100'
-                  : 'border-surface-600 bg-surface-700/30 text-slate-400 hover:border-slate-500'
+                  ? 'border-[#C6FF4D] bg-[#C6FF4D]/10 ring-1 ring-[#C6FF4D]/40 text-[#F4F5F0]'
+                  : 'border-[#30372F] bg-[#151815] text-[#A1A79E] hover:border-[#C6FF4D]/40'
               }`}
             >
-              <Calendar size={20} className={publishType === 'later' ? 'text-brand-400' : 'text-slate-500'} />
+              <Calendar size={20} className={publishType === 'later' ? 'text-[#C6FF4D]' : 'text-[#747D72]'} />
               <div>
                 <p className="font-600 text-sm">Schedule for Later</p>
-                <p className="text-xs text-slate-400 mt-0.5">Choose a future date and time to go live</p>
+                <p className="text-xs text-[#A1A79E] mt-0.5">Choose a future date and time to go live</p>
               </div>
             </button>
           </div>
 
           {publishType === 'later' && (
             <div className="flex flex-col gap-3 pt-2 animate-fade-in">
-              <label className="text-xs font-600 text-slate-300 uppercase tracking-wider block">
+              <label className="text-xs font-600 text-[#A1A79E] uppercase tracking-wider block">
                 Select Publication Date & Time
               </label>
 
@@ -427,24 +427,24 @@ export default function CreateListingPage() {
                 min={getMinDatetime()}
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 required={publishType === 'later'}
               />
 
               {/* Quick presets */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">Quick presets:</span>
+                <span className="text-xs text-[#747D72]">Quick presets:</span>
                 <button
                   type="button"
                   onClick={() => setTomorrowPreset(9)}
-                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs"
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                 >
                   Tomorrow 9:00 AM
                 </button>
                 <button
                   type="button"
                   onClick={() => setTomorrowPreset(18)}
-                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs"
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                 >
                   Tomorrow 6:00 PM
                 </button>
@@ -454,21 +454,21 @@ export default function CreateListingPage() {
 
           {/* Schedule Preview Banner */}
           {preview && (
-            <div className="bg-surface-700/50 border border-white/5 rounded-xl p-3.5 flex flex-col gap-1 text-xs text-slate-300">
+            <div className="bg-[#151815] border border-[#30372F] rounded-xl p-3.5 flex flex-col gap-1 text-xs text-[#A1A79E]">
               <div className="flex items-center gap-2">
-                <Clock size={14} className="text-brand-400" />
+                <Clock size={14} className="text-[#C6FF4D]" />
                 <span>
-                  <strong>Goes Live:</strong> {preview.startText}
+                  <strong className="text-[#F4F5F0]">Goes Live:</strong> {preview.startText}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center gap-2 text-[#747D72]">
                 <span className="w-3.5" />
                 <span>
-                  <strong>Auction Closes:</strong> {preview.endText}
+                  <strong className="text-[#A1A79E]">Auction Closes:</strong> {preview.endText}
                 </span>
               </div>
               {publishType === 'later' && preview.valid === false && (
-                <p className="text-rose-400 font-600 mt-1">
+                <p className="text-[#FF7373] font-600 mt-1">
                   ⚠️ Publication time must be in the future.
                 </p>
               )}
@@ -477,7 +477,7 @@ export default function CreateListingPage() {
         </div>
 
         {/* Image Upload Component */}
-        <div className="glass rounded-2xl p-6">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 shadow-lg">
           <ImageUpload
             newFiles={selectedFiles}
             onNewFilesChange={setSelectedFiles}
@@ -487,7 +487,7 @@ export default function CreateListingPage() {
         </div>
 
         {/* Product Video Upload Component (Optional) */}
-        <div className="glass rounded-2xl p-6">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 shadow-lg">
           <VideoUpload
             selectedFile={selectedVideo}
             onFileChange={setSelectedVideo}

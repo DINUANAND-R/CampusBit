@@ -14,13 +14,13 @@ import SellerAnalyticsView from './SellerAnalyticsView';
 import WantedAlertsView from './WantedAlertsView';
 
 const statusColor = {
-  active:    'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
-  scheduled: 'text-brand-400   bg-brand-400/10   border-brand-400/20',
-  cancelled: 'text-rose-400    bg-rose-400/10    border-rose-400/20',
-  closed:    'text-indigo-400  bg-indigo-400/10  border-indigo-400/20',
-  unsold:    'text-slate-400   bg-slate-400/10   border-slate-400/20',
-  completed: 'text-gold-400    bg-gold-400/10    border-gold-400/20',
-  draft:     'text-slate-500   bg-slate-500/10   border-slate-500/20',
+  active: 'text-[#65D99A] bg-[#65D99A]/15 border-[#65D99A]/30',
+  scheduled: 'text-[#82C9FF] bg-[#82C9FF]/15 border-[#82C9FF]/30',
+  cancelled: 'text-[#FF7373] bg-[#FF7373]/15 border-[#FF7373]/30',
+  closed: 'text-[#A1A79E] bg-[#1B201B] border-[#30372F]',
+  unsold: 'text-[#747D72] bg-[#151815] border-[#30372F]',
+  completed: 'text-[#C6FF4D] bg-[#C6FF4D]/15 border-[#C6FF4D]/30',
+  draft: 'text-[#747D72] bg-[#151815] border-[#30372F]',
 };
 
 export default function DashboardPage() {
@@ -215,13 +215,13 @@ export default function DashboardPage() {
                 onClick={() => setListingFilter(id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-600 transition-all flex items-center gap-1.5 ${
                   listingFilter === id
-                    ? 'bg-brand-500 text-white shadow-sm'
-                    : 'bg-surface-700/60 text-slate-400 hover:text-slate-200 hover:bg-surface-700'
+                    ? 'bg-[#C6FF4D] text-[#101211] shadow-sm'
+                    : 'bg-[#1B201B] text-[#A1A79E] hover:text-[#F4F5F0] border border-[#30372F]'
                 }`}
               >
                 <span>{label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  listingFilter === id ? 'bg-black/30 text-white' : 'bg-surface-800 text-slate-500'
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full tabular-nums ${
+                  listingFilter === id ? 'bg-[#101211]/25 text-[#101211] font-700' : 'bg-[#151815] text-[#747D72]'
                 }`}>
                   {countByStatus[id] || 0}
                 </span>

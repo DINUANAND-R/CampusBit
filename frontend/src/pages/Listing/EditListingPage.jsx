@@ -270,13 +270,13 @@ export default function EditListingPage() {
 
       <form onSubmit={submit} className="flex flex-col gap-6">
         {/* Item Details */}
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 text-lg mb-1">Item details</h2>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] text-lg mb-1">Item details</h2>
 
           {field('Title',
             <input
               id="edit-listing-title"
-              className="input"
+              className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
               maxLength={120}
               required
               disabled={saving}
@@ -288,7 +288,7 @@ export default function EditListingPage() {
           {field('Description',
             <textarea
               id="edit-listing-desc"
-              className="input min-h-28 resize-y"
+              className="input min-h-28 resize-y bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
               maxLength={2000}
               required
               disabled={saving}
@@ -301,7 +301,7 @@ export default function EditListingPage() {
             {field('Category',
               <select
                 id="edit-listing-category"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 disabled={saving}
                 value={form.category}
                 onChange={set('category')}
@@ -314,7 +314,7 @@ export default function EditListingPage() {
             {field('Condition',
               <select
                 id="edit-listing-condition"
-                className="input"
+                className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 disabled={saving}
                 value={form.condition}
                 onChange={set('condition')}
@@ -329,12 +329,12 @@ export default function EditListingPage() {
 
         {/* Reschedule publication (only if scheduled) */}
         {listingStatus === 'scheduled' && (
-          <div className="glass rounded-2xl p-6 flex flex-col gap-4 border border-brand-500/20">
-            <div className="flex items-center gap-2 text-brand-400">
+          <div className="bg-[#1B201B] rounded-2xl p-6 flex flex-col gap-4 border border-[#C6FF4D]/30 shadow-lg">
+            <div className="flex items-center gap-2 text-[#C6FF4D]">
               <Calendar size={18} />
-              <h2 className="font-600 text-slate-200 text-lg">Scheduled publication time</h2>
+              <h2 className="font-600 text-[#F4F5F0] text-lg">Scheduled publication time</h2>
             </div>
-            <p className="text-slate-400 text-xs">
+            <p className="text-[#A1A79E] text-xs">
               This auction is scheduled to go live automatically. You can choose a new future date and time.
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -342,7 +342,7 @@ export default function EditListingPage() {
                 <input
                   id="edit-listing-publish-at"
                   type="datetime-local"
-                  className="input"
+                  className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                   required
                   disabled={saving}
                   value={scheduledAt}
@@ -354,7 +354,7 @@ export default function EditListingPage() {
                 <input
                   id="edit-listing-ends-at"
                   type="datetime-local"
-                  className="input"
+                  className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                   disabled={saving}
                   value={endsAt}
                   min={scheduledAt}
@@ -367,8 +367,8 @@ export default function EditListingPage() {
         )}
 
         {/* Pricing Options */}
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 text-lg mb-1">Pricing options</h2>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] text-lg mb-1">Pricing options</h2>
 
           <div className="grid grid-cols-2 gap-4">
             {field('Reserve price (₹)',
@@ -376,7 +376,7 @@ export default function EditListingPage() {
                 <input
                   id="edit-listing-reserve"
                   type="number"
-                  className={`input ${hasBids ? 'opacity-50 cursor-not-allowed bg-surface-900' : ''}`}
+                  className={`input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums ${hasBids ? 'opacity-50 cursor-not-allowed bg-[#101211]' : ''}`}
                   min={1}
                   disabled={saving || hasBids}
                   value={form.reservePrice}
@@ -384,7 +384,7 @@ export default function EditListingPage() {
                   placeholder={hasBids ? 'Locked' : 'Optional'}
                 />
                 {hasBids && (
-                  <Lock size={14} className="absolute right-3 top-3 text-slate-500" />
+                  <Lock size={14} className="absolute right-3 top-3 text-[#747D72]" />
                 )}
               </div>,
               hasBids ? 'Locked: active bidding in progress' : "Item won't sell if bids don't reach this"
@@ -394,14 +394,14 @@ export default function EditListingPage() {
                 <input
                   id="edit-listing-increment"
                   type="number"
-                  className={`input ${hasBids ? 'opacity-50 cursor-not-allowed bg-surface-900' : ''}`}
+                  className={`input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums ${hasBids ? 'opacity-50 cursor-not-allowed bg-[#101211]' : ''}`}
                   min={1}
                   disabled={saving || hasBids}
                   value={form.minBidIncrement}
                   onChange={set('minBidIncrement')}
                 />
                 {hasBids && (
-                  <Lock size={14} className="absolute right-3 top-3 text-slate-500" />
+                  <Lock size={14} className="absolute right-3 top-3 text-[#747D72]" />
                 )}
               </div>,
               hasBids ? 'Locked: active bidding in progress' : 'Minimum amount each bid must exceed current price'
@@ -410,7 +410,7 @@ export default function EditListingPage() {
         </div>
 
         {/* Image Management */}
-        <div className="glass rounded-2xl p-6">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 shadow-lg">
           <ImageUpload
             existingImages={existingImages}
             onExistingImagesChange={setExistingImages}
@@ -422,7 +422,7 @@ export default function EditListingPage() {
         </div>
 
         {/* Product Video Management (Optional) */}
-        <div className="glass rounded-2xl p-6">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 shadow-lg">
           <VideoUpload
             existingVideo={existingVideo}
             onExistingVideoChange={setExistingVideo}

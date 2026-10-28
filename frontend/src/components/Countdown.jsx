@@ -6,26 +6,29 @@ export default function Countdown({ endsAt, className = '' }) {
 
   if (total <= 0) {
     return (
-      <span className={`badge text-rose-400 bg-rose-400/10 border border-rose-400/20 ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-600 text-[#FF7373] bg-[#FF7373]/10 border border-[#FF7373]/20 ${className}`}>
         Auction Ended
       </span>
     );
   }
 
   const isUrgent = total < 5 * 60 * 1000; // < 5 min
-  const isLate   = total < 30 * 1000;      // < 30 s
+  const isLate = total < 30 * 1000;      // < 30 s
 
   return (
-    <div className={`flex items-center gap-1.5 ${className}`}>
+    <div className={`flex items-center gap-1.5 tabular-nums ${className}`}>
       {isLate ? (
-        <Zap size={14} className="text-gold-400 animate-bounce" />
+        <Zap size={13} className="text-[#FFC857] animate-pulse" />
       ) : (
-        <Clock size={14} className={isUrgent ? 'text-rose-400' : 'text-brand-400'} />
+        <Clock size={13} className={isUrgent ? 'text-[#FFC857]' : 'text-[#C6FF4D]'} />
       )}
       <span
-        className={`font-mono font-700 text-sm ${
-          isLate   ? 'shimmer-text' :
-          isUrgent ? 'text-rose-400' : 'text-brand-400'
+        className={`font-mono font-600 text-xs tracking-tight ${
+          isLate
+            ? 'text-[#FFC857] font-700'
+            : isUrgent
+            ? 'text-[#FFC857]'
+            : 'text-[#C6FF4D]'
         }`}
       >
         {hours > 0 ? `${pad(hours)}h ` : ''}

@@ -89,31 +89,31 @@ export default function HandoverPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <h1 className="font-display font-700 text-2xl text-slate-100 mb-2">Handover</h1>
-      <p className="text-slate-400 text-sm mb-8">
-        Auction: <span className="text-slate-200 font-600">{listing?.title}</span>
+    <div className="max-w-lg mx-auto px-4 py-8 text-[#F4F5F0]">
+      <h1 className="font-display font-700 text-2xl text-[#F4F5F0] mb-2">Handover</h1>
+      <p className="text-[#A1A79E] text-sm mb-8">
+        Auction: <span className="text-[#F4F5F0] font-600">{listing?.title}</span>
       </p>
 
       {/* Summary card */}
-      <div className="glass rounded-2xl p-6 mb-6 flex flex-col gap-3">
+      <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 mb-6 flex flex-col gap-3 shadow-lg">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Final price</span>
-          <span className="font-700 gradient-text text-lg">₹{handover?.finalPrice?.toLocaleString()}</span>
+          <span className="text-[#A1A79E]">Final price</span>
+          <span className="font-display font-800 text-[#C6FF4D] text-lg tabular-nums">₹{handover?.finalPrice?.toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Seller</span>
-          <span className="text-slate-200">@{handover?.seller?.username}</span>
+          <span className="text-[#A1A79E]">Seller</span>
+          <span className="text-[#F4F5F0]">@{handover?.seller?.username}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Buyer (winner)</span>
-          <span className="text-slate-200">@{handover?.buyer?.username}</span>
+          <span className="text-[#A1A79E]">Buyer (winner)</span>
+          <span className="text-[#F4F5F0]">@{handover?.buyer?.username}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-400">Status</span>
+          <span className="text-[#A1A79E]">Status</span>
           <span className={`font-600 capitalize ${
-            handover?.sellerDecision === 'approved' ? 'text-emerald-400' :
-            handover?.sellerDecision === 'rejected' ? 'text-rose-400' : 'text-gold-400'
+            handover?.sellerDecision === 'approved' ? 'text-[#65D99A]' :
+            handover?.sellerDecision === 'rejected' ? 'text-[#FF7373]' : 'text-[#FFC857]'
           }`}>
             {handover?.completedAt ? '✅ Completed' : handover?.sellerDecision}
           </span>
@@ -122,10 +122,10 @@ export default function HandoverPage() {
 
       {/* ── Seller view ──────────────────────────────────────────────────── */}
       {isSeller && handover?.sellerDecision === 'pending' && (
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200">Seller decision</h2>
-          <p className="text-slate-400 text-sm">
-            The buyer won your item for <strong className="text-slate-200">₹{handover?.finalPrice?.toLocaleString()}</strong>.
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0]">Seller decision</h2>
+          <p className="text-[#A1A79E] text-sm">
+            The buyer won your item for <strong className="text-[#F4F5F0] tabular-nums">₹{handover?.finalPrice?.toLocaleString()}</strong>.
             Approve to generate the handover code, or reject if you can't proceed.
           </p>
           <div className="flex gap-3">
@@ -139,8 +139,8 @@ export default function HandoverPage() {
           </div>
           {/* Rejection reason */}
           <div>
-            <label className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Rejection reason (required to reject)</label>
-            <input className="input text-sm" value={reason} onChange={(e) => setReason(e.target.value)}
+            <label className="text-xs text-[#A1A79E] uppercase tracking-wider mb-1 block">Rejection reason (required to reject)</label>
+            <input className="input text-sm bg-[#151815] border-[#30372F] text-[#F4F5F0]" value={reason} onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Item damaged, buyer unreachable…" />
             <button id="confirm-reject-btn" onClick={reject} disabled={acting || !reason.trim()}
               className="btn btn-danger btn-sm mt-2 w-full">
@@ -151,11 +151,11 @@ export default function HandoverPage() {
       )}
 
       {isSeller && handover?.sellerDecision === 'approved' && !handover?.completedAt && (
-        <div className="glass rounded-2xl p-6 flex flex-col gap-3">
-          <h2 className="font-600 text-emerald-400 flex items-center gap-2"><Key size={18} /> Your handover code</h2>
-          <p className="text-slate-400 text-sm">Share this code with the buyer to confirm item handover.</p>
-          <div className="text-center bg-surface-700 rounded-xl py-6 border border-emerald-400/20">
-            <span className="font-mono font-800 text-4xl tracking-widest text-emerald-400">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-3 shadow-lg">
+          <h2 className="font-600 text-[#65D99A] flex items-center gap-2"><Key size={18} /> Your handover code</h2>
+          <p className="text-[#A1A79E] text-sm">Share this code with the buyer to confirm item handover.</p>
+          <div className="text-center bg-[#151815] rounded-xl py-6 border border-[#C6FF4D]/30">
+            <span className="font-mono font-800 text-4xl tracking-widest text-[#C6FF4D] tabular-nums">
               {handover.handoverCode}
             </span>
           </div>
@@ -164,14 +164,14 @@ export default function HandoverPage() {
 
       {/* ── Buyer view ───────────────────────────────────────────────────── */}
       {isBuyer && handover?.sellerDecision === 'approved' && !handover?.completedAt && (
-        <div className="glass rounded-2xl p-6 flex flex-col gap-4">
-          <h2 className="font-600 text-slate-200 flex items-center gap-2"><Key size={18} /> Enter handover code</h2>
-          <p className="text-slate-400 text-sm">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
+          <h2 className="font-600 text-[#F4F5F0] flex items-center gap-2"><Key size={18} /> Enter handover code</h2>
+          <p className="text-[#A1A79E] text-sm">
             The seller has approved. Get the 6-digit code from them and enter it below to confirm you've received the item.
           </p>
           <input
             id="otp-input"
-            className="input text-center font-mono text-2xl tracking-widest py-4"
+            className="input text-center font-mono text-2xl tracking-widest py-4 bg-[#151815] border-[#30372F] text-[#C6FF4D] tabular-nums"
             maxLength={6}
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
@@ -186,10 +186,10 @@ export default function HandoverPage() {
 
       {/* Completed */}
       {handover?.completedAt && (
-        <div className="glass rounded-2xl p-6 text-center">
-          <CheckCircle size={48} className="text-emerald-400 mx-auto mb-3" />
-          <h2 className="font-700 text-xl text-emerald-400 mb-2">Handover complete!</h2>
-          <p className="text-slate-400 text-sm">
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 text-center shadow-lg">
+          <CheckCircle size={48} className="text-[#65D99A] mx-auto mb-3" />
+          <h2 className="font-700 text-xl text-[#65D99A] mb-2">Handover complete!</h2>
+          <p className="text-[#A1A79E] text-sm">
             Completed on {new Date(handover.completedAt).toLocaleString()}
           </p>
         </div>
@@ -197,19 +197,19 @@ export default function HandoverPage() {
 
       {/* Rejected */}
       {handover?.sellerDecision === 'rejected' && (
-        <div className="glass rounded-2xl p-6 text-center">
-          <XCircle size={48} className="text-rose-400 mx-auto mb-3" />
-          <h2 className="font-700 text-xl text-rose-400 mb-2">Handover rejected</h2>
-          <p className="text-slate-400 text-sm">{handover.rejectionReason || 'The seller rejected this handover.'}</p>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 text-center shadow-lg">
+          <XCircle size={48} className="text-[#FF7373] mx-auto mb-3" />
+          <h2 className="font-700 text-xl text-[#FF7373] mb-2">Handover rejected</h2>
+          <p className="text-[#A1A79E] text-sm">{handover.rejectionReason || 'The seller rejected this handover.'}</p>
         </div>
       )}
 
       {/* Waiting for seller */}
       {handover?.sellerDecision === 'pending' && !isSeller && (
-        <div className="glass rounded-2xl p-6 text-center">
-          <Package size={48} className="text-gold-400 mx-auto mb-3" />
-          <h2 className="font-700 text-xl text-gold-400 mb-2">Awaiting seller decision</h2>
-          <p className="text-slate-400 text-sm">The seller needs to approve before handover can proceed.</p>
+        <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6 text-center shadow-lg">
+          <Package size={48} className="text-[#FFC857] mx-auto mb-3" />
+          <h2 className="font-700 text-xl text-[#FFC857] mb-2">Awaiting seller decision</h2>
+          <p className="text-[#A1A79E] text-sm">The seller needs to approve before handover can proceed.</p>
         </div>
       )}
     </div>

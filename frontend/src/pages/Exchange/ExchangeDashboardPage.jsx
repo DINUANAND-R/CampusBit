@@ -28,32 +28,32 @@ import { getImageUrl } from '../../utils/imageUrl';
 const STATUS_CONFIG = {
   READY_TO_ARRANGE: {
     label: 'Ready to Arrange',
-    color: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    color: 'bg-[#82C9FF]/10 text-[#82C9FF] border-[#82C9FF]/30',
     description: 'Auction won. Parties can now propose a campus meeting time and location.',
   },
   HANDOVER_SCHEDULED: {
     label: 'Handover Scheduled',
-    color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    color: 'bg-[#C6FF4D]/10 text-[#C6FF4D] border-[#C6FF4D]/30',
     description: 'Meeting agreed! Meet at the scheduled campus location.',
   },
   HANDED_OVER: {
     label: 'Confirmation Pending',
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    color: 'bg-[#FFC857]/10 text-[#FFC857] border-[#FFC857]/30',
     description: 'One party has confirmed handover. Awaiting second confirmation to complete.',
   },
   COMPLETED: {
     label: 'Completed',
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    color: 'bg-[#65D99A]/10 text-[#65D99A] border-[#65D99A]/30',
     description: 'Both parties confirmed handover. Transaction successfully finished!',
   },
   DISPUTED: {
     label: 'Disputed',
-    color: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    color: 'bg-[#FF7373]/10 text-[#FF7373] border-[#FF7373]/30',
     description: 'A dispute has been raised. Admin moderation team has been notified.',
   },
   CANCELLED: {
     label: 'Cancelled',
-    color: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+    color: 'bg-[#202620] text-[#747D72] border-[#30372F]',
     description: 'Exchange cancelled.',
   },
 };
@@ -348,7 +348,7 @@ export default function ExchangeDashboardPage() {
             return (
               <div
                 key={exchange._id}
-                className="glass rounded-2xl p-6 border border-white/10 hover:border-brand-500/30 transition-all flex flex-col gap-5 bg-slate-900/40"
+                className="bg-[#1B201B] rounded-2xl p-6 border border-[#30372F] hover:border-[#C6FF4D]/30 transition-all flex flex-col gap-5 shadow-lg"
               >
                 {/* ── Top Row: Product + Counterparty Info ── */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -356,11 +356,11 @@ export default function ExchangeDashboardPage() {
                     <img
                       src={getImageUrl(exchange.listing?.images?.[0])}
                       alt={exchange.listing?.title}
-                      className="w-16 h-16 rounded-xl object-cover bg-slate-800 border border-white/10 shrink-0"
+                      className="w-16 h-16 rounded-xl object-cover bg-[#101211] border border-[#30372F] shrink-0"
                     />
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-300 border border-brand-500/30 uppercase tracking-wider">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#C6FF4D]/15 text-[#C6FF4D] border border-[#C6FF4D]/30 uppercase tracking-wider">
                           {roleBadge}
                         </span>
                         <span
@@ -369,13 +369,13 @@ export default function ExchangeDashboardPage() {
                           {statusInfo.label}
                         </span>
                       </div>
-                      <h3 className="font-display font-700 text-lg text-slate-100 hover:text-brand-300 transition-colors">
+                      <h3 className="font-display font-700 text-lg text-[#F4F5F0] hover:text-[#C6FF4D] transition-colors">
                         <Link to={`/listings/${exchange.listing?._id}`}>
                           {exchange.listing?.title}
                         </Link>
                       </h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Winning bid: <strong className="text-emerald-400 font-bold">₹{exchange.winningAmount?.toLocaleString()}</strong> • With @{counterparty?.username}
+                      <p className="text-xs text-[#A1A79E] mt-0.5">
+                        Winning bid: <strong className="text-[#65D99A] font-bold tabular-nums">₹{exchange.winningAmount?.toLocaleString()}</strong> • With @{counterparty?.username}
                       </p>
                     </div>
                   </div>
@@ -386,15 +386,15 @@ export default function ExchangeDashboardPage() {
                     <Link
                       to={`/chat?conv=${exchange.conversation?._id || ''}`}
                       id={`chat-exchange-${exchange._id}`}
-                      className="btn btn-secondary btn-sm flex items-center gap-1.5 text-xs"
+                      className="btn btn-secondary btn-sm flex items-center gap-1.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                     >
-                      <MessageSquare size={14} className="text-brand-400" /> Chat
+                      <MessageSquare size={14} className="text-[#C6FF4D]" /> Chat
                     </Link>
 
                     {/* Timeline History */}
                     <button
                       onClick={() => handleOpenHistory(exchange)}
-                      className="btn btn-secondary btn-sm flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"
+                      className="btn btn-secondary btn-sm flex items-center gap-1.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                       title="View audit trail"
                     >
                       <History size={14} /> History
@@ -404,7 +404,7 @@ export default function ExchangeDashboardPage() {
                     {exchange.status !== 'COMPLETED' && exchange.status !== 'DISPUTED' && (
                       <button
                         onClick={() => handleOpenDispute(exchange)}
-                        className="btn btn-secondary btn-sm p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                        className="btn btn-secondary btn-sm p-2 text-[#FF7373] hover:text-[#FF7373] hover:bg-[#FF7373]/10"
                         title="Raise dispute"
                       >
                         <ShieldAlert size={15} />
@@ -414,7 +414,7 @@ export default function ExchangeDashboardPage() {
                 </div>
 
                 {/* ── Middle: Handover Arrangement Status Box ── */}
-                <div className="p-4 rounded-xl bg-slate-950/40 border border-white/5 flex flex-col gap-3">
+                <div className="p-4 rounded-xl bg-[#151815] border border-[#30372F] flex flex-col gap-3">
                   {hasProposal ? (
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>

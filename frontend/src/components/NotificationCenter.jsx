@@ -220,14 +220,14 @@ export default function NotificationCenter() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Notifications"
         className={`btn btn-secondary btn-sm relative p-2 rounded-xl transition-all ${
-          isOpen ? 'bg-white/10 text-white ring-2 ring-brand-500/40' : 'text-slate-300 hover:text-white'
+          isOpen ? 'bg-[#202620] text-white ring-1 ring-[#C6FF4D]/40' : 'text-[#A1A79E] hover:text-[#F4F5F0]'
         }`}
       >
-        <Bell size={18} className={unreadCount > 0 ? 'text-amber-400' : ''} />
+        <Bell size={18} className={unreadCount > 0 ? 'text-[#C6FF4D]' : ''} />
         {unreadCount > 0 && (
           <span
             id="notification-badge"
-            className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] flex items-center justify-center shadow-lg shadow-rose-500/50 animate-pulse"
+            className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-[#C6FF4D] text-[#101211] text-[10px] font-bold leading-none min-w-[18px] h-[18px] flex items-center justify-center shadow-md shadow-[#C6FF4D]/30 tabular-nums"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
@@ -238,14 +238,14 @@ export default function NotificationCenter() {
       {isOpen && (
         <div
           id="notification-dropdown"
-          className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-1.5rem)] glass-panel border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl bg-slate-900/95 z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-1.5rem)] border border-[#30372F] rounded-2xl shadow-2xl bg-[#151815] z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header */}
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+          <div className="px-4 py-3 border-b border-[#30372F] flex items-center justify-between bg-[#101211]/50">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white text-sm">Notifications</span>
+              <span className="font-semibold text-[#F4F5F0] text-sm">Notifications</span>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold">
+                <span className="px-2 py-0.5 rounded-full bg-[#C6FF4D]/15 text-[#C6FF4D] text-xs font-semibold border border-[#C6FF4D]/30 tabular-nums">
                   {unreadCount} new
                 </span>
               )}
@@ -254,7 +254,7 @@ export default function NotificationCenter() {
               <button
                 onClick={handleMarkAllRead}
                 id="mark-all-notifications-read-btn"
-                className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1 transition-colors font-medium"
+                className="text-xs text-[#C6FF4D] hover:text-[#D6FF7C] flex items-center gap-1 transition-colors font-medium"
               >
                 <CheckCheck size={14} /> Mark all read
               </button>
@@ -262,13 +262,13 @@ export default function NotificationCenter() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2 text-xs bg-slate-950/40">
+          <div className="px-4 py-2 border-b border-[#30372F] flex items-center gap-2 text-xs bg-[#101211]/80">
             <button
               onClick={() => setFilter('all')}
               className={`px-3 py-1 rounded-lg transition-all ${
                 filter === 'all'
-                  ? 'bg-brand-500 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] font-bold shadow-sm'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#1B201B]'
               }`}
             >
               All
@@ -277,8 +277,8 @@ export default function NotificationCenter() {
               onClick={() => setFilter('unread')}
               className={`px-3 py-1 rounded-lg transition-all ${
                 filter === 'unread'
-                  ? 'bg-brand-500 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] font-bold shadow-sm'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#1B201B]'
               }`}
             >
               Unread only
@@ -322,10 +322,10 @@ export default function NotificationCenter() {
                     onClick={() => handleNotificationClick(notif)}
                     className={`p-3 transition-colors cursor-pointer flex gap-3 items-start group ${
                       notif.isRead
-                        ? 'hover:bg-white/[0.03] opacity-80 hover:opacity-100'
+                        ? 'hover:bg-[#1B201B] opacity-75 hover:opacity-100'
                         : isWantedMatch
-                        ? 'bg-amber-500/10 hover:bg-amber-500/15 border-l-2 border-amber-400'
-                        : 'bg-brand-500/10 hover:bg-brand-500/15 border-l-2 border-brand-500'
+                        ? 'bg-[#FFC857]/10 hover:bg-[#FFC857]/15 border-l-2 border-[#FFC857]'
+                        : 'bg-[#C6FF4D]/[0.07] hover:bg-[#C6FF4D]/[0.12] border-l-2 border-[#C6FF4D]'
                     }`}
                   >
                     {/* Thumbnail / Icon */}
@@ -334,16 +334,16 @@ export default function NotificationCenter() {
                         <img
                           src={notif.imageUrl}
                           alt="Product"
-                          className="w-10 h-10 rounded-lg object-cover bg-slate-800 border border-white/10"
+                          className="w-10 h-10 rounded-lg object-cover bg-[#101211] border border-[#30372F]"
                         />
                       ) : (
                         <div
                           className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
                             isWantedMatch
-                              ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                              ? 'bg-[#FFC857]/10 text-[#FFC857] border-[#FFC857]/30'
                               : isNewListing
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-brand-500/10 text-brand-400 border-brand-500/20'
+                              ? 'bg-[#65D99A]/10 text-[#65D99A] border-[#65D99A]/20'
+                              : 'bg-[#C6FF4D]/10 text-[#C6FF4D] border-[#C6FF4D]/20'
                           }`}
                         >
                           {isWantedMatch ? <Sparkles size={18} /> : isNewListing ? <Tag size={18} /> : <MessageSquare size={18} />}
@@ -351,8 +351,8 @@ export default function NotificationCenter() {
                       )}
                       {!notif.isRead && (
                         <span
-                          className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ring-2 ring-slate-900 ${
-                            isWantedMatch ? 'bg-amber-400' : 'bg-brand-400'
+                          className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ring-2 ring-[#151815] ${
+                            isWantedMatch ? 'bg-[#FFC857]' : 'bg-[#C6FF4D]'
                           }`}
                         />
                       )}
@@ -363,32 +363,32 @@ export default function NotificationCenter() {
                       <div className="flex items-center justify-between gap-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {isWantedMatch && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-[#FFC857]/20 text-[#FFC857] border border-[#FFC857]/30 shrink-0">
                               Wanted Match
                             </span>
                           )}
-                          <span className="text-xs font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
+                          <span className="text-xs font-semibold text-[#F4F5F0] truncate group-hover:text-[#C6FF4D] transition-colors">
                             {notif.title}
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-500 shrink-0 flex items-center gap-0.5">
+                        <span className="text-[10px] text-[#747D72] shrink-0 flex items-center gap-0.5 tabular-nums">
                           <Clock size={10} />
                           {formatTimeAgo(notif.createdAt)}
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#A1A79E] mt-0.5 line-clamp-2 leading-relaxed">
                         {notif.message}
                       </p>
 
                       <div className="flex items-center gap-2 mt-1.5">
                         {notif.startingPrice !== null && notif.startingPrice !== undefined && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#65D99A]/15 text-[#65D99A] border border-[#65D99A]/30 tabular-nums">
                             Starts at ₹{notif.startingPrice}
                           </span>
                         )}
                         {notif.link && (
-                          <span className="text-[10px] text-brand-400 flex items-center gap-0.5 group-hover:underline">
+                          <span className="text-[10px] text-[#C6FF4D] flex items-center gap-0.5 group-hover:underline">
                             View details <ExternalLink size={10} />
                           </span>
                         )}
@@ -400,7 +400,7 @@ export default function NotificationCenter() {
                       <button
                         title="Mark as read"
                         onClick={(e) => handleMarkOneRead(e, notif)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 rounded-lg text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#202620] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Check size={14} />
                       </button>
@@ -412,11 +412,11 @@ export default function NotificationCenter() {
 
             {/* Load More */}
             {hasMore && (
-              <div className="p-2 text-center bg-white/[0.01]">
+              <div className="p-2 text-center bg-[#101211]/30">
                 <button
                   onClick={() => fetchNotifications(page + 1, true)}
                   disabled={loading}
-                  className="text-xs text-brand-400 hover:text-brand-300 py-1 px-3 rounded-lg hover:bg-white/5 transition-colors font-medium"
+                  className="text-xs text-[#C6FF4D] hover:text-[#D6FF7C] py-1 px-3 rounded-lg hover:bg-[#202620] transition-colors font-medium"
                 >
                   {loading ? 'Loading...' : 'Load older notifications'}
                 </button>
@@ -430,16 +430,16 @@ export default function NotificationCenter() {
       {toast && (
         <div
           id="in-app-notification-toast"
-          className="fixed bottom-6 right-6 z-50 max-w-sm w-full glass-panel border border-brand-500/40 rounded-2xl p-4 shadow-2xl backdrop-blur-2xl bg-slate-900/95 flex gap-3 items-start animate-in slide-in-from-bottom-5 duration-300"
+          className="fixed bottom-6 right-6 z-50 max-w-sm w-full border border-[#30372F] rounded-2xl p-4 shadow-2xl bg-[#151815] flex gap-3 items-start animate-in slide-in-from-bottom-5 duration-300"
         >
           {toast.imageUrl ? (
             <img
               src={toast.imageUrl}
               alt="Listing"
-              className="w-12 h-12 rounded-xl object-cover bg-slate-800 border border-white/10 shrink-0"
+              className="w-12 h-12 rounded-xl object-cover bg-[#101211] border border-[#30372F] shrink-0"
             />
           ) : (
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/30 to-purple-600/30 border border-brand-500/30 flex items-center justify-center text-brand-400 shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#202620] border border-[#30372F] flex items-center justify-center text-[#C6FF4D] shrink-0">
               <Tag size={20} />
             </div>
           )}
@@ -448,7 +448,7 @@ export default function NotificationCenter() {
             <div className="flex items-center justify-between gap-1">
               <span
                 className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-                  toast.type === 'WANTED_ALERT_MATCH' ? 'text-amber-400' : 'text-brand-400'
+                  toast.type === 'WANTED_ALERT_MATCH' ? 'text-[#FFC857]' : 'text-[#C6FF4D]'
                 }`}
               >
                 {toast.type === 'WANTED_ALERT_MATCH' ? (
@@ -461,18 +461,18 @@ export default function NotificationCenter() {
               </span>
               <button
                 onClick={() => setToast(null)}
-                className="text-slate-400 hover:text-white p-0.5 rounded transition-colors"
+                className="text-[#747D72] hover:text-[#F4F5F0] p-0.5 rounded transition-colors"
               >
                 <X size={14} />
               </button>
             </div>
 
-            <p className="text-xs font-semibold text-white mt-0.5 truncate">{toast.title}</p>
-            <p className="text-xs text-slate-300 mt-0.5 line-clamp-2">{toast.message}</p>
+            <p className="text-xs font-semibold text-[#F4F5F0] mt-0.5 truncate">{toast.title}</p>
+            <p className="text-xs text-[#A1A79E] mt-0.5 line-clamp-2">{toast.message}</p>
 
             <div className="flex items-center gap-2 mt-2">
               {toast.startingPrice && (
-                <span className="text-xs font-bold text-emerald-400">
+                <span className="text-xs font-bold text-[#65D99A] tabular-nums">
                   ₹{toast.startingPrice}
                 </span>
               )}

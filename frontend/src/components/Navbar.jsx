@@ -3,8 +3,22 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { conversationsApi } from '../api';
 import NotificationCenter from './NotificationCenter';
-import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare, Handshake, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import {
+  Gavel,
+  LogOut,
+  Plus,
+  LayoutDashboard,
+  Search,
+  MessageSquare,
+  Handshake,
+  Sparkles,
+  Compass,
+  ChevronDown,
+  Shield,
+  User,
+  Package,
+} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -12,6 +26,19 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -41,93 +68,234 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (search.trim()) navigate(`/?q=${encodeURIComponent(search.trim())}`);
+    if (search.trim()) {
+      navigate(`/?q=${encodeURIComponent(search.trim())}`);
+    }
   };
 
   return (
-    <nav className="sticky top-0 z-50 glass border-b border-white/8">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
-            <Gavel size={18} className="text-white" />
+    <nav className="sticky top-0 z-50 bg-[#101211]/90 backdrop-blur-md border-b border-[#30372F]">
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-3 sm:gap-4">
+        {/* Logo / Wordmark */}
+        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+          <div className="w-8 h-8 rounded-lg bg-[#1B201B] border border-[#30372F] group-hover:border-[#C6FF4D]/50 flex items-center justify-center transition-all">
+            <Gavel size={16} className="text-[#C6FF4D]" />
           </div>
-          <span className="font-display font-700 text-xl gradient-text hidden sm:block">
-            CampusBid
+          <span className="font-display font-700 text-lg tracking-tight text-[#F4F5F0] hidden sm:block">
+            Campus<span className="text-[#C6FF4D]">Bid</span>
           </span>
         </Link>
 
-        {/* Search */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-md">
+        {/* Search Field */}
+        <form onSubmit={handleSearch} className="flex-1 max-w-sm sm:max-w-md mx-1">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#747D72]"
+            />
             <input
               id="nav-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search auctions…"
-              className="input pl-9 py-2 text-sm"
+              placeholder="Search auctions, products, textbooks…"
+              className="w-full bg-[#151815] border border-[#30372F] focus:border-[#C6FF4D] text-[#F4F5F0] placeholder-[#747D72] text-xs sm:text-sm pl-8 pr-3 py-1.5 rounded-lg outline-none transition-all"
             />
           </div>
         </form>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 ml-auto shrink-0">
-          <Link
+        {/* Center / Navigation Links */}
+        <div className="hidden lg:flex items-center gap-1">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `px-2.5 py-1.5 rounded-lg text-xs font-500 transition-colors flex items-center gap-1.5 ${
+                isActive
+                  ? 'text-[#C6FF4D] bg-[#1B201B]'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#151815]'
+              }`
+            }
+          >
+            <Compass size={14} />
+            <span>Explore</span>
+          </NavLink>
+
+          <NavLink
             to="/assistant"
             id="nav-assistant-link"
-            className="btn btn-secondary btn-sm flex items-center gap-1.5 border-brand-500/30 text-brand-300 hover:text-white hover:border-brand-400"
-            title="CampusBid AI Shopping Assistant"
+            className={({ isActive }) =>
+              `px-2.5 py-1.5 rounded-lg text-xs font-500 transition-colors flex items-center gap-1.5 ${
+                isActive
+                  ? 'text-[#C6FF4D] bg-[#1B201B]'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#151815]'
+              }`
+            }
+            title="Rule-Based AI Shopping Assistant"
           >
-            <Sparkles size={14} className="text-brand-400 animate-pulse" />
-            <span className="hidden sm:inline font-600">AI Assistant</span>
-          </Link>
+            <Sparkles size={14} className="text-[#C6FF4D]" />
+            <span>AI Assistant</span>
+          </NavLink>
 
-          {user ? (
+          {user && (
             <>
-              <Link to="/listings/new" className="btn btn-primary btn-sm">
-                <Plus size={15} /> Sell
-              </Link>
-              <Link to="/dashboard" className="btn btn-secondary btn-sm">
-                <LayoutDashboard size={15} />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Link>
-              <Link to="/exchange" id="nav-exchange-link" className="btn btn-secondary btn-sm flex items-center gap-1.5" title="My Transactions & Handover">
-                <Handshake size={15} className="text-emerald-400" />
-                <span className="hidden md:inline">Exchange</span>
-              </Link>
-              <Link to="/chat" id="nav-chat-link" className="btn btn-secondary btn-sm relative flex items-center gap-1.5">
-                <MessageSquare size={15} className="text-brand-400" />
-                <span className="hidden sm:inline">Campus Chat</span>
+              <NavLink
+                to="/exchange"
+                id="nav-exchange-link"
+                className={({ isActive }) =>
+                  `px-2.5 py-1.5 rounded-lg text-xs font-500 transition-colors flex items-center gap-1.5 ${
+                    isActive
+                      ? 'text-[#C6FF4D] bg-[#1B201B]'
+                      : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#151815]'
+                  }`
+                }
+                title="Product Exchange & Handovers"
+              >
+                <Handshake size={14} className="text-[#65D99A]" />
+                <span>Exchange</span>
+              </NavLink>
+
+              <NavLink
+                to="/chat"
+                id="nav-chat-link"
+                className={({ isActive }) =>
+                  `relative px-2.5 py-1.5 rounded-lg text-xs font-500 transition-colors flex items-center gap-1.5 ${
+                    isActive
+                      ? 'text-[#C6FF4D] bg-[#1B201B]'
+                      : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#151815]'
+                  }`
+                }
+              >
+                <MessageSquare size={14} />
+                <span>Messages</span>
                 {unreadCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-full bg-[#C6FF4D] text-[#101211] text-[10px] font-700 flex items-center justify-center">
                     {unreadCount}
                   </span>
                 )}
-              </Link>
-              <NotificationCenter />
-              {user.role === 'admin' && (
-                <Link
-                  to="/admin"
-                  id="nav-admin-link"
-                  className="btn btn-secondary btn-sm border-amber-400/40 text-amber-300 hover:bg-amber-500/10"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  <span>Admin</span>
-                </Link>
-              )}
-              <button onClick={() => { logout(); navigate('/'); }} className="btn btn-secondary btn-sm">
-                <LogOut size={15} />
+              </NavLink>
+            </>
+          )}
+        </div>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 ml-auto shrink-0">
+          {/* Sell Button */}
+          {user && (
+            <Link
+              to="/listings/new"
+              id="nav-sell-btn"
+              className="btn btn-primary btn-sm flex items-center gap-1 font-700"
+            >
+              <Plus size={14} />
+              <span>Sell Item</span>
+            </Link>
+          )}
+
+          {/* Notifications */}
+          {user && <NotificationCenter />}
+
+          {/* User Profile Dropdown or Login Buttons */}
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                id="nav-user-dropdown-btn"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-[#1B201B] border border-transparent hover:border-[#30372F] transition-all text-xs"
+              >
+                <div className="w-7 h-7 rounded-md bg-[#1B201B] border border-[#30372F] text-[#C6FF4D] font-bold text-xs flex items-center justify-center">
+                  {user.username?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <ChevronDown
+                  size={13}
+                  className={`text-[#747D72] transition-transform duration-150 ${
+                    dropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-xs font-700 text-white shrink-0">
-                {user.username[0].toUpperCase()}
-              </div>
-            </>
+
+              {/* Profile Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#151815] border border-[#30372F] shadow-2xl p-2 z-50 text-xs text-[#F4F5F0] animate-in fade-in duration-150">
+                  {/* User Info Header */}
+                  <div className="px-3 py-2 border-b border-[#30372F] mb-1">
+                    <p className="font-600 text-[#F4F5F0] truncate">{user.username}</p>
+                    <p className="text-[11px] text-[#747D72] truncate">{user.email}</p>
+                    {user.campusId && (
+                      <span className="inline-block mt-1 text-[10px] text-[#A1A79E] bg-[#1B201B] px-1.5 py-0.5 rounded border border-[#30372F]">
+                        ID: {user.campusId}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Menu Items */}
+                  <div className="space-y-0.5">
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1B201B] hover:text-[#C6FF4D] transition-colors"
+                    >
+                      <LayoutDashboard size={14} />
+                      <span>Seller Dashboard</span>
+                    </Link>
+
+                    <Link
+                      to="/exchange"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1B201B] hover:text-[#C6FF4D] transition-colors"
+                    >
+                      <Handshake size={14} className="text-[#65D99A]" />
+                      <span>Transactions & Handover</span>
+                    </Link>
+
+                    <Link
+                      to="/chat"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1B201B] hover:text-[#C6FF4D] transition-colors"
+                    >
+                      <MessageSquare size={14} />
+                      <span>Campus Chat</span>
+                    </Link>
+
+                    {user.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        id="nav-admin-link"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1B201B] text-[#FFC857] hover:text-[#FFC857] transition-colors"
+                      >
+                        <Shield size={14} />
+                        <span>Admin Console</span>
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="border-t border-[#30372F] mt-1.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        logout();
+                        navigate('/');
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[#FF7373] hover:bg-[#FF7373]/10 transition-colors"
+                    >
+                      <LogOut size={14} />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
-            <>
-              <Link to="/login" className="btn btn-secondary btn-sm">Login</Link>
-              <Link to="/register" className="btn btn-primary btn-sm">Join Free</Link>
-            </>
+            <div className="flex items-center gap-1.5">
+              <Link to="/login" className="btn btn-secondary btn-sm py-1.5 px-3">
+                Log In
+              </Link>
+              <Link to="/register" className="btn btn-primary btn-sm py-1.5 px-3 font-700">
+                Join Free
+              </Link>
+            </div>
           )}
         </div>
       </div>

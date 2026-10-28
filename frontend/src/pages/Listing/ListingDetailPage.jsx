@@ -14,10 +14,10 @@ import {
 import { getImageUrl, getVideoUrl } from '../../utils/imageUrl';
 
 const conditionBadge = {
-  new:        'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
-  'like-new': 'bg-brand-400/10   text-brand-400   border-brand-400/20',
-  good:       'bg-gold-400/10    text-gold-400    border-gold-400/20',
-  fair:       'bg-slate-400/10   text-slate-400   border-slate-400/20',
+  new: 'bg-[#65D99A]/15 text-[#65D99A] border-[#65D99A]/30',
+  'like-new': 'bg-[#C6FF4D]/15 text-[#C6FF4D] border-[#C6FF4D]/30',
+  good: 'bg-[#FFC857]/15 text-[#FFC857] border-[#FFC857]/30',
+  fair: 'bg-[#747D72]/20 text-[#A1A79E] border-[#30372F]',
 };
 
 export default function ListingDetailPage() {
@@ -570,15 +570,15 @@ export default function ListingDetailPage() {
         {/* Right — bid panel & discussion switcher */}
         <div className="flex flex-col gap-4">
           {/* Tab Switcher */}
-          <div className="glass rounded-xl p-1.5 flex items-center gap-1 border border-white/10">
+          <div className="bg-[#1B201B] rounded-xl p-1.5 flex items-center gap-1 border border-[#30372F]">
             <button
               id="tab-bids"
               type="button"
               onClick={() => { setActiveTab('bids'); setSearchParams({}); }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
                 activeTab === 'bids'
-                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] shadow-sm'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#202620]'
               }`}
             >
               <Gavel size={14} />
@@ -590,8 +590,8 @@ export default function ListingDetailPage() {
               onClick={() => { setActiveTab('discussion'); setSearchParams({ tab: 'discussion' }); }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
                 activeTab === 'discussion'
-                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] shadow-sm'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#202620]'
               }`}
             >
               <MessageSquare size={14} />
@@ -604,16 +604,16 @@ export default function ListingDetailPage() {
           ) : (
             <>
               {/* Price + timer */}
-              <div className="glass rounded-2xl p-6">
-            <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">
+              <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl p-6">
+            <p className="text-xs text-[#A1A79E] uppercase tracking-widest mb-1">
               {isScheduled ? 'Starting price' : 'Current price'}
             </p>
-            <p className="font-display font-800 text-4xl gradient-text mb-1">
-              ₹{listing.currentPrice?.toLocaleString()}
+            <p className="font-display font-800 text-4xl text-[#C6FF4D] tabular-nums tracking-tight mb-1">
+              ₹{listing.currentPrice?.toLocaleString('en-IN')}
             </p>
-            <p className="text-xs text-slate-500 mb-4">
-              Starting price: ₹{listing.startingPrice?.toLocaleString()}
-              {listing.reservePrice && ` · Reserve: ₹${listing.reservePrice.toLocaleString()}`}
+            <p className="text-xs text-[#747D72] mb-4">
+              Starting price: ₹{listing.startingPrice?.toLocaleString('en-IN')}
+              {listing.reservePrice && ` · Reserve: ₹${listing.reservePrice.toLocaleString('en-IN')}`}
             </p>
 
             {isActive && (
@@ -656,15 +656,15 @@ export default function ListingDetailPage() {
             {isActive && !isSeller && (
               <div className="flex flex-col gap-3">
                 {/* Switcher: Automatic Proxy Bid vs Instant Bid */}
-                <div className="flex items-center gap-1 p-1 bg-surface-700/60 rounded-xl border border-white/5 text-xs font-600">
+                <div className="flex items-center gap-1 p-1 bg-[#151815] rounded-xl border border-[#30372F] text-xs font-600">
                   <button
                     id="tab-mode-proxy"
                     type="button"
                     onClick={() => setBidMode('proxy')}
                     className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
                       bidMode === 'proxy'
-                        ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/30'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-[#C6FF4D] text-[#101211] font-700 shadow-sm'
+                        : 'text-[#A1A79E] hover:text-[#F4F5F0]'
                     }`}
                   >
                     <ShieldCheck size={13} />
@@ -676,8 +676,8 @@ export default function ListingDetailPage() {
                     onClick={() => setBidMode('manual')}
                     className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
                       bidMode === 'manual'
-                        ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/30'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-[#C6FF4D] text-[#101211] font-700 shadow-sm'
+                        : 'text-[#A1A79E] hover:text-[#F4F5F0]'
                     }`}
                   >
                     <Gavel size={13} />

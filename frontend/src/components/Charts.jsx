@@ -28,7 +28,7 @@ export function DateRangeFilter({ selectedPeriod, onPeriodChange, customRange, o
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="inline-flex rounded-xl bg-surface-700/60 p-1 border border-white/5">
+      <div className="inline-flex rounded-xl bg-[#151815] p-1 border border-[#30372F]">
         {periods.map(({ id, label }) => (
           <button
             key={id}
@@ -43,8 +43,8 @@ export function DateRangeFilter({ selectedPeriod, onPeriodChange, customRange, o
             }}
             className={`px-3 py-1.5 rounded-lg text-xs font-600 transition-all ${
               selectedPeriod === id
-                ? 'bg-brand-500 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-surface-600/40'
+                ? 'bg-[#C6FF4D] text-[#101211] font-700 shadow-sm'
+                : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#202620]'
             }`}
           >
             {label}
@@ -53,7 +53,7 @@ export function DateRangeFilter({ selectedPeriod, onPeriodChange, customRange, o
       </div>
 
       {showCustom && (
-        <form onSubmit={handleApplyCustom} className="flex items-center gap-2 bg-surface-800 border border-brand-500/30 p-2 rounded-xl text-xs animate-fade-in">
+        <form onSubmit={handleApplyCustom} className="flex items-center gap-2 bg-[#1B201B] border border-[#C6FF4D]/30 p-2 rounded-xl text-xs animate-fade-in">
           <input
             type="date"
             value={start}
@@ -61,7 +61,7 @@ export function DateRangeFilter({ selectedPeriod, onPeriodChange, customRange, o
             className="input py-1 px-2 text-xs"
             required
           />
-          <span className="text-slate-400">to</span>
+          <span className="text-[#A1A79E]">to</span>
           <input
             type="date"
             value={end}
@@ -69,13 +69,13 @@ export function DateRangeFilter({ selectedPeriod, onPeriodChange, customRange, o
             className="input py-1 px-2 text-xs"
             required
           />
-          <button type="submit" className="btn btn-primary btn-sm py-1 px-2 text-xs">
+          <button type="submit" className="btn btn-primary btn-sm py-1 px-2 text-xs font-700">
             Apply
           </button>
           <button
             type="button"
             onClick={() => setShowCustom(false)}
-            className="btn btn-secondary btn-sm py-1 px-2 text-xs text-slate-400"
+            className="btn btn-secondary btn-sm py-1 px-2 text-xs text-[#747D72]"
           >
             Cancel
           </button>
@@ -94,8 +94,8 @@ export function TrendAreaChart({
   dataKey2 = null,
   label = 'Count',
   label2 = null,
-  color = '#6366f1',
-  color2 = '#10b981',
+  color = '#C6FF4D',
+  color2 = '#65D99A',
   height = 240,
   emptyMessage = 'No activity recorded during this period.',
 }) {

@@ -290,24 +290,24 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-65px)] bg-surface-900 flex flex-col text-slate-100">
+    <div className="min-h-[calc(100vh-65px)] bg-[#101211] flex flex-col text-[#F4F5F0]">
       {/* ── Top Header ───────────────────────────────────────────────────────── */}
-      <div className="border-b border-white/8 bg-surface-800/80 backdrop-blur-md sticky top-14 z-20 px-4 py-3">
+      <div className="border-b border-[#30372F] bg-[#151815]/90 backdrop-blur-md sticky top-14 z-20 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-              <Sparkles size={20} className="text-white animate-pulse" />
+            <div className="w-10 h-10 rounded-xl bg-[#1B201B] border border-[#30372F] flex items-center justify-center text-[#C6FF4D] shadow-sm shadow-[#C6FF4D]/10">
+              <Sparkles size={20} className="text-[#C6FF4D]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display font-700 text-base sm:text-lg text-white">
+                <h1 className="font-display font-700 text-base sm:text-lg text-[#F4F5F0]">
                   CampusBid AI Assistant
                 </h1>
-                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-brand-500/15 border border-brand-500/30 text-brand-300">
+                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-[#C6FF4D]/15 border border-[#C6FF4D]/30 text-[#C6FF4D]">
                   Rule-Based Engine
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-xs text-[#A1A79E] hidden sm:block">
                 Natural-language product discovery, comparisons, and guided bidding using real database data
               </p>
             </div>
@@ -318,7 +318,7 @@ export default function AssistantPage() {
               type="button"
               id="clear-assistant-chat-btn"
               onClick={handleClearChat}
-              className="btn btn-secondary btn-sm py-1.5 px-3 text-xs flex items-center gap-1.5 text-slate-400 hover:text-white"
+              className="btn btn-secondary btn-sm py-1.5 px-3 text-xs flex items-center gap-1.5 text-[#A1A79E] hover:text-[#F4F5F0]"
               title="Clear Chat History"
             >
               <RotateCcw size={13} />
@@ -330,24 +330,24 @@ export default function AssistantPage() {
 
       {/* ── Comparison Tray Floating Banner ─────────────────────────────────── */}
       {compareItems.length > 0 && (
-        <div className="bg-brand-950/80 border-b border-brand-500/30 px-4 py-2 sticky top-[118px] z-20 backdrop-blur-md">
+        <div className="bg-[#1B201B] border-b border-[#30372F] px-4 py-2 sticky top-[118px] z-20 backdrop-blur-md">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
-              <Scale size={14} className="text-brand-400 shrink-0" />
-              <span className="text-slate-300">
+              <Scale size={14} className="text-[#C6FF4D] shrink-0" />
+              <span className="text-[#A1A79E]">
                 Selected for comparison ({compareItems.length}/2):
               </span>
               <div className="flex items-center gap-1.5">
                 {compareItems.map((item) => (
                   <span
                     key={item._id}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-700 border border-white/10 text-slate-200"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#202620] border border-[#30372F] text-[#F4F5F0]"
                   >
                     <span className="max-w-[120px] truncate">{item.title}</span>
                     <button
                       type="button"
                       onClick={() => handleToggleCompare(item)}
-                      className="hover:text-rose-400"
+                      className="hover:text-[#FF7373]"
                     >
                       <X size={11} />
                     </button>
@@ -370,7 +370,7 @@ export default function AssistantPage() {
               <button
                 type="button"
                 onClick={() => setCompareItems([])}
-                className="text-slate-400 hover:text-slate-200 p-1"
+                className="text-[#747D72] hover:text-[#F4F5F0] p-1"
                 title="Clear comparison selection"
               >
                 <X size={14} />
@@ -391,8 +391,8 @@ export default function AssistantPage() {
           >
             {/* Assistant Avatar */}
             {msg.sender === 'assistant' && (
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20 mt-1">
-                <Sparkles size={14} className="text-white" />
+              <div className="w-8 h-8 rounded-xl bg-[#202620] border border-[#30372F] flex items-center justify-center shrink-0 shadow-sm text-[#C6FF4D] mt-1">
+                <Sparkles size={14} />
               </div>
             )}
 
@@ -400,8 +400,8 @@ export default function AssistantPage() {
             <div
               className={`max-w-[92%] sm:max-w-[85%] md:max-w-[78%] rounded-2xl p-4 text-sm ${
                 msg.sender === 'user'
-                  ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-lg shadow-brand-600/15 rounded-tr-none'
-                  : 'bg-surface-800 border border-white/8 text-slate-200 shadow-md rounded-tl-none'
+                  ? 'bg-[#C6FF4D] text-[#101211] font-medium shadow-md shadow-[#C6FF4D]/15 rounded-tr-none'
+                  : 'bg-[#1B201B] border border-[#30372F] text-[#F4F5F0] shadow-md rounded-tl-none'
               }`}
             >
               {/* Message Content */}
@@ -497,37 +497,37 @@ export default function AssistantPage() {
                       </div>
 
                       {/* Item B */}
-                      <div className="bg-surface-800/90 rounded-lg p-3.5 border border-white/6 flex flex-col justify-between">
+                      <div className="bg-[#151815] rounded-lg p-3.5 border border-[#30372F] flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className="text-[10px] font-700 px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase">
+                            <span className="text-[10px] font-700 px-2 py-0.5 rounded bg-[#82C9FF]/20 text-[#82C9FF] uppercase">
                               Option B
                             </span>
-                            <span className="text-xs text-slate-400">{msg.comparison.itemB.category}</span>
+                            <span className="text-xs text-[#A1A79E]">{msg.comparison.itemB.category}</span>
                           </div>
-                          <h4 className="font-display font-700 text-slate-100 text-sm mb-1 line-clamp-2">
+                          <h4 className="font-display font-700 text-[#F4F5F0] text-sm mb-1 line-clamp-2">
                             {msg.comparison.itemB.title}
                           </h4>
-                          <div className="space-y-1.5 text-xs text-slate-300 my-2">
+                          <div className="space-y-1.5 text-xs text-[#A1A79E] my-2">
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Current Price:</span>
-                              <span className="font-700 text-emerald-400">₹{msg.comparison.itemB.currentPrice?.toLocaleString('en-IN')}</span>
+                              <span className="text-[#747D72]">Current Price:</span>
+                              <span className="font-700 text-[#65D99A] tabular-nums">₹{msg.comparison.itemB.currentPrice?.toLocaleString('en-IN')}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Condition:</span>
-                              <span className="font-600 text-slate-200 capitalize">{msg.comparison.itemB.condition}</span>
+                              <span className="text-[#747D72]">Condition:</span>
+                              <span className="font-600 text-[#F4F5F0] capitalize">{msg.comparison.itemB.condition}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Next Minimum Bid:</span>
-                              <span className="text-slate-300">₹{msg.comparison.itemB.minNextBid?.toLocaleString('en-IN')}</span>
+                              <span className="text-[#747D72]">Next Minimum Bid:</span>
+                              <span className="text-[#F4F5F0] tabular-nums">₹{msg.comparison.itemB.minNextBid?.toLocaleString('en-IN')}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Time Left:</span>
-                              <span className="text-amber-400">{formatTimeLeft(msg.comparison.itemB.endsAt)}</span>
+                              <span className="text-[#747D72]">Time Left:</span>
+                              <span className="text-[#FFC857]">{formatTimeLeft(msg.comparison.itemB.endsAt)}</span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-white/6">
+                        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[#30372F]">
                           <Link
                             to={`/listings/${msg.comparison.itemB._id}`}
                             className="btn btn-secondary btn-sm flex-1 text-center py-1 text-xs"
@@ -550,12 +550,12 @@ export default function AssistantPage() {
 
               {/* Product Result Grid */}
               {msg.listings && msg.listings.length > 0 && !msg.comparison && (
-                <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="font-600 text-slate-300">
+                <div className="mt-4 pt-3 border-t border-[#30372F] space-y-3">
+                  <div className="flex items-center justify-between text-xs text-[#A1A79E]">
+                    <span className="font-600 text-[#F4F5F0]">
                       Live Matching Auctions ({msg.listings.length})
                     </span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-[#747D72]">
                       Real-time database records
                     </span>
                   </div>
@@ -568,11 +568,11 @@ export default function AssistantPage() {
                       return (
                         <div
                           key={l._id}
-                          className="bg-surface-900/90 border border-white/8 hover:border-brand-500/40 rounded-xl overflow-hidden flex flex-col justify-between transition-all group"
+                          className="bg-[#151815] border border-[#30372F] hover:border-[#C6FF4D]/40 rounded-xl overflow-hidden flex flex-col justify-between transition-all group"
                         >
                           <div>
                             {/* Card Image */}
-                            <div className="relative aspect-video w-full bg-surface-950 overflow-hidden">
+                            <div className="relative aspect-video w-full bg-[#101211] overflow-hidden">
                               <img
                                 src={imgUrl}
                                 alt={l.title}
@@ -580,15 +580,15 @@ export default function AssistantPage() {
                                 onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
                               />
                               <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-surface-900/80 backdrop-blur-md text-slate-300 border border-white/10 capitalize">
+                                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-[#101211]/80 backdrop-blur-md text-[#A1A79E] border border-[#30372F] capitalize">
                                   {l.category}
                                 </span>
-                                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-surface-900/80 backdrop-blur-md text-emerald-400 border border-emerald-500/30 capitalize">
+                                <span className="text-[10px] font-600 px-2 py-0.5 rounded-full bg-[#101211]/80 backdrop-blur-md text-[#65D99A] border border-[#65D99A]/30 capitalize">
                                   {l.condition}
                                 </span>
                               </div>
                               {l.endsAt && (
-                                <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-950/80 backdrop-blur-md text-[11px] font-600 text-amber-300 border border-amber-500/30">
+                                <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#101211]/80 backdrop-blur-md text-[11px] font-600 text-[#FFC857] border border-[#FFC857]/30">
                                   <Clock size={11} />
                                   <span>{formatTimeLeft(l.endsAt)}</span>
                                 </div>
@@ -597,32 +597,32 @@ export default function AssistantPage() {
 
                             {/* Card Details */}
                             <div className="p-3">
-                              <h4 className="font-display font-700 text-slate-100 text-sm line-clamp-1 group-hover:text-brand-300 transition-colors">
+                              <h4 className="font-display font-700 text-[#F4F5F0] text-sm line-clamp-1 group-hover:text-[#C6FF4D] transition-colors">
                                 {l.title}
                               </h4>
 
                               <div className="flex items-baseline justify-between mt-2">
                                 <div>
-                                  <span className="text-[11px] text-slate-400 block">
+                                  <span className="text-[11px] text-[#747D72] block">
                                     {l.priceType || 'Current bid'}:
                                   </span>
-                                  <span className="font-display font-700 text-base text-emerald-400">
+                                  <span className="font-display font-700 text-base text-[#65D99A] tabular-nums">
                                     ₹{l.currentPrice?.toLocaleString('en-IN')}
                                   </span>
                                 </div>
                                 <div className="text-right">
-                                  <span className="text-[11px] text-slate-400 block">
+                                  <span className="text-[11px] text-[#747D72] block">
                                     Min Next Bid:
                                   </span>
-                                  <span className="text-xs font-600 text-slate-300">
+                                  <span className="text-xs font-600 text-[#F4F5F0] tabular-nums">
                                     ₹{l.minNextBid?.toLocaleString('en-IN')}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2 pt-2 border-t border-white/6">
+                              <div className="flex items-center justify-between text-[11px] text-[#747D72] mt-2 pt-2 border-t border-[#30372F]">
                                 <span>Seller: @{l.seller?.username || 'Student'}</span>
-                                <span>{l.bidCount || 0} {l.bidCount === 1 ? 'bid' : 'bids'}</span>
+                                <span className="tabular-nums">{l.bidCount || 0} {l.bidCount === 1 ? 'bid' : 'bids'}</span>
                               </div>
                             </div>
                           </div>
@@ -631,7 +631,7 @@ export default function AssistantPage() {
                           <div className="p-3 pt-0 grid grid-cols-3 gap-1.5">
                             <Link
                               to={`/listings/${l._id}`}
-                              className="btn btn-secondary btn-sm py-1.5 text-[11px] flex items-center justify-center gap-1 text-slate-300 hover:text-white"
+                              className="btn btn-secondary btn-sm py-1.5 text-[11px] flex items-center justify-center gap-1 text-[#A1A79E] hover:text-[#F4F5F0]"
                               title="View listing details"
                             >
                               <ExternalLink size={12} /> View
@@ -641,8 +641,8 @@ export default function AssistantPage() {
                               onClick={() => handleToggleCompare(l)}
                               className={`btn btn-secondary btn-sm py-1.5 text-[11px] flex items-center justify-center gap-1 ${
                                 isComparing
-                                  ? 'border-brand-400 text-brand-300 bg-brand-500/10'
-                                  : 'text-slate-400 hover:text-white'
+                                  ? 'border-[#C6FF4D] text-[#C6FF4D] bg-[#C6FF4D]/10'
+                                  : 'text-[#A1A79E] hover:text-[#F4F5F0]'
                               }`}
                               title="Compare this item"
                             >
@@ -667,7 +667,7 @@ export default function AssistantPage() {
 
             {/* User Avatar */}
             {msg.sender === 'user' && (
-              <div className="w-8 h-8 rounded-xl bg-surface-700 border border-white/10 flex items-center justify-center shrink-0 mt-1 text-xs font-bold text-slate-200">
+              <div className="w-8 h-8 rounded-xl bg-[#202620] border border-[#30372F] flex items-center justify-center shrink-0 mt-1 text-xs font-bold text-[#F4F5F0]">
                 {user?.username ? user.username[0].toUpperCase() : 'U'}
               </div>
             )}
@@ -677,11 +677,11 @@ export default function AssistantPage() {
         {/* Loading Indicator */}
         {loading && (
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20">
-              <Sparkles size={14} className="text-white animate-spin" />
+            <div className="w-8 h-8 rounded-xl bg-[#202620] border border-[#30372F] flex items-center justify-center shrink-0 text-[#C6FF4D]">
+              <Sparkles size={14} className="animate-spin" />
             </div>
-            <div className="bg-surface-800 border border-white/8 rounded-2xl rounded-tl-none p-4 text-sm text-slate-300 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand-400 animate-ping" />
+            <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl rounded-tl-none p-4 text-sm text-[#A1A79E] flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#C6FF4D] animate-ping" />
               <span>Searching real campus listings and evaluating criteria…</span>
             </div>
           </div>
@@ -691,18 +691,18 @@ export default function AssistantPage() {
       </div>
 
       {/* ── Suggested Prompts & Chat Input Dock ──────────────────────────────── */}
-      <div className="border-t border-white/8 bg-surface-800/90 backdrop-blur-md p-4 sticky bottom-0 z-10">
+      <div className="border-t border-[#30372F] bg-[#151815]/95 backdrop-blur-md p-4 sticky bottom-0 z-10">
         <div className="max-w-5xl mx-auto space-y-3">
           {/* Quick Prompts Chips */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-            <span className="text-slate-500 shrink-0 font-600 text-[11px]">Suggested:</span>
+            <span className="text-[#747D72] shrink-0 font-600 text-[11px]">Suggested:</span>
             {SUGGESTED_PROMPTS.map((prompt, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleSend(prompt)}
                 disabled={loading}
-                className="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-700/80 hover:bg-surface-600 text-slate-300 hover:text-white border border-white/6 hover:border-brand-400/40 transition-all text-xs shrink-0 cursor-pointer disabled:opacity-50"
+                className="whitespace-nowrap px-3 py-1.5 rounded-full bg-[#1B201B] hover:bg-[#202620] text-[#A1A79E] hover:text-[#F4F5F0] border border-[#30372F] hover:border-[#C6FF4D]/40 transition-all text-xs shrink-0 cursor-pointer disabled:opacity-50"
               >
                 {prompt}
               </button>
@@ -724,7 +724,7 @@ export default function AssistantPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything, e.g., 'Find me a cycle under ₹2,000' or 'Compare laptops'…"
               disabled={loading}
-              className="input flex-1 py-3 px-4 text-sm bg-surface-900 border-white/10 focus:border-brand-500"
+              className="input flex-1 py-3 px-4 text-sm bg-[#101211] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
             />
             <button
               id="assistant-send-btn"
@@ -741,44 +741,44 @@ export default function AssistantPage() {
 
       {/* ── Bidding Confirmation Modal ──────────────────────────────────────── */}
       {biddingListing && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-800 border border-white/15 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/8">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1B201B] border border-[#30372F] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#30372F]">
               <div className="flex items-center gap-2">
-                <Gavel size={18} className="text-brand-400" />
-                <h3 className="font-display font-700 text-base text-slate-100">
+                <Gavel size={18} className="text-[#C6FF4D]" />
+                <h3 className="font-display font-700 text-base text-[#F4F5F0]">
                   Assistant Proxy Bidding
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setBiddingListing(null)}
-                className="text-slate-400 hover:text-slate-200 p-1"
+                className="text-[#747D72] hover:text-[#F4F5F0] p-1"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Listing Summary */}
-            <div className="bg-surface-900 rounded-xl p-3.5 border border-white/6 flex items-center gap-3">
+            <div className="bg-[#151815] rounded-xl p-3.5 border border-[#30372F] flex items-center gap-3">
               <img
                 src={biddingListing.images?.[0] ? getImageUrl(biddingListing.images[0]) : FALLBACK_IMAGE}
                 alt={biddingListing.title}
-                className="w-14 h-14 rounded-lg object-cover bg-surface-950 shrink-0"
+                className="w-14 h-14 rounded-lg object-cover bg-[#101211] shrink-0 border border-[#30372F]"
               />
               <div className="min-w-0 flex-1">
-                <h4 className="font-display font-700 text-sm text-slate-100 truncate">
+                <h4 className="font-display font-700 text-sm text-[#F4F5F0] truncate">
                   {biddingListing.title}
                 </h4>
                 <div className="flex items-center justify-between mt-1 text-xs">
-                  <span className="text-slate-400">Current Price:</span>
-                  <span className="font-700 text-emerald-400">
+                  <span className="text-[#747D72]">Current Price:</span>
+                  <span className="font-700 text-[#65D99A] tabular-nums">
                     ₹{biddingListing.currentPrice?.toLocaleString('en-IN')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Minimum Required:</span>
-                  <span className="font-600 text-slate-300">
+                  <span className="text-[#747D72]">Minimum Required:</span>
+                  <span className="font-600 text-[#F4F5F0] tabular-nums">
                     ₹{biddingListing.minNextBid?.toLocaleString('en-IN')}
                   </span>
                 </div>
@@ -787,7 +787,7 @@ export default function AssistantPage() {
 
             {/* Maximum Bid Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-600 text-slate-300">
+              <label className="text-xs font-600 text-[#A1A79E]">
                 Your Maximum Authorized Bid (₹)
               </label>
               <input
@@ -795,20 +795,20 @@ export default function AssistantPage() {
                 min={biddingListing.minNextBid || biddingListing.currentPrice + 10}
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
-                className="input py-2.5 px-3 text-base font-display font-700 text-emerald-300 bg-surface-900"
+                className="input py-2.5 px-3 text-base font-display font-700 text-[#C6FF4D] bg-[#101211] border-[#30372F] tabular-nums"
                 placeholder={`Min ₹${biddingListing.minNextBid || biddingListing.currentPrice + 10}`}
               />
-              <p className="text-[11px] text-slate-400 leading-normal">
+              <p className="text-[11px] text-[#747D72] leading-normal">
                 CampusBid automated proxy bidding will place the lowest required bid (₹{biddingListing.minNextBid?.toLocaleString('en-IN')}) and only increment up to your confirmed maximum if other students place competing bids.
               </p>
             </div>
 
             {/* Explicit Approval Warning Banner */}
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300 flex items-start gap-2">
-              <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="bg-[#FFC857]/10 border border-[#FFC857]/20 rounded-xl p-3 text-xs text-[#FFC857] flex items-start gap-2">
+              <AlertCircle size={16} className="text-[#FFC857] shrink-0 mt-0.5" />
               <div>
-                <p className="font-600 text-amber-200">Explicit Student Confirmation Required</p>
-                <p className="text-amber-300/80 mt-0.5">
+                <p className="font-600 text-[#FFC857]">Explicit Student Confirmation Required</p>
+                <p className="text-[#FFC857]/80 mt-0.5">
                   Bids are binding commitments under CampusBid campus auction policies. You will never be charged above ₹{Number(bidAmount || 0).toLocaleString('en-IN')}.
                 </p>
               </div>
@@ -833,7 +833,7 @@ export default function AssistantPage() {
               >
                 {bidSubmitting ? (
                   <>
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span className="w-3.5 h-3.5 border-2 border-[#101211] border-t-transparent rounded-full animate-spin" />
                     <span>Confirming…</span>
                   </>
                 ) : (

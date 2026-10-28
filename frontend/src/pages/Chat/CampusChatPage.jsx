@@ -451,27 +451,27 @@ export default function CampusChatPage() {
       </div>
 
       {/* Main Container Layout */}
-      <div className="glass rounded-2xl border border-white/10 overflow-hidden grid grid-cols-1 md:grid-cols-12 h-[calc(100vh-210px)] min-h-[580px]">
+      <div className="bg-[#151815] rounded-2xl border border-[#30372F] overflow-hidden grid grid-cols-1 md:grid-cols-12 h-[calc(100vh-210px)] min-h-[580px] shadow-2xl">
         {/* Left Panel (Conversations & Requests) */}
         <div
-          className={`md:col-span-5 lg:col-span-4 border-r border-white/8 bg-surface-900/60 flex flex-col min-h-0 ${
+          className={`md:col-span-5 lg:col-span-4 border-r border-[#30372F] bg-[#101211]/80 flex flex-col min-h-0 ${
             showMobileChat ? 'hidden md:flex' : 'flex'
           }`}
         >
           {/* Navigation Tabs (Chats vs Looking for Item) */}
-          <div className="p-3 border-b border-white/8 grid grid-cols-2 gap-1.5 bg-surface-800/40">
+          <div className="p-3 border-b border-[#30372F] grid grid-cols-2 gap-1.5 bg-[#151815]">
             <button
               onClick={() => { setActiveTab('conversations'); setSearchParams({}); }}
               className={`py-2 px-3 rounded-xl text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
                 activeTab === 'conversations'
-                  ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] shadow-sm shadow-[#C6FF4D]/20'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#1B201B]'
               }`}
             >
               <MessageSquare size={14} />
               <span>Messages</span>
               {conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0) > 0 && (
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center font-bold">
+                <span className="w-4 h-4 rounded-full bg-[#FF7373] text-white text-[10px] flex items-center justify-center font-bold tabular-nums">
                   {conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0)}
                 </span>
               )}
@@ -481,8 +481,8 @@ export default function CampusChatPage() {
               onClick={() => { setActiveTab('requests'); setSearchParams({ tab: 'requests' }); }}
               className={`py-2 px-3 rounded-xl text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
                 activeTab === 'requests'
-                  ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  ? 'bg-[#C6FF4D] text-[#101211] shadow-sm shadow-[#C6FF4D]/20'
+                  : 'text-[#A1A79E] hover:text-[#F4F5F0] hover:bg-[#1B201B]'
               }`}
             >
               <Tag size={14} />
@@ -491,28 +491,28 @@ export default function CampusChatPage() {
           </div>
 
           {/* Search Bar */}
-          <div className="p-3 border-b border-white/5">
+          <div className="p-3 border-b border-[#30372F]">
             <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#747D72]" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={activeTab === 'conversations' ? 'Search messages, peers…' : 'Search wanted items…'}
-                className="input pl-9 py-1.5 text-xs bg-surface-900 border-white/10"
+                className="input pl-9 py-1.5 text-xs bg-[#101211] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
               />
             </div>
           </div>
 
           {/* Tab 1: Conversations List */}
           {activeTab === 'conversations' && (
-            <div className="flex-1 overflow-y-auto divide-y divide-white/5">
+            <div className="flex-1 overflow-y-auto divide-y divide-[#30372F]/50">
               {loadingConvs ? (
-                <div className="p-8 text-center text-slate-500 text-xs">Loading conversations…</div>
+                <div className="p-8 text-center text-[#747D72] text-xs">Loading conversations…</div>
               ) : conversations.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
-                  <MessageSquare size={32} className="text-slate-600 mb-1" />
-                  <p className="text-sm font-600 text-slate-300">No conversations yet</p>
-                  <p className="text-xs text-slate-500 max-w-xs">
+                <div className="p-8 text-center text-[#A1A79E] flex flex-col items-center justify-center gap-2">
+                  <MessageSquare size={32} className="text-[#747D72] mb-1" />
+                  <p className="text-sm font-600 text-[#F4F5F0]">No conversations yet</p>
+                  <p className="text-xs text-[#747D72] max-w-xs">
                     Start a discussion from any auction listing or respond to student item requests.
                   </p>
                 </div>
@@ -532,15 +532,15 @@ export default function CampusChatPage() {
                       }}
                       className={`w-full p-3 text-left flex items-start gap-3 transition-all ${
                         isSelected
-                          ? 'bg-brand-500/15 border-l-3 border-brand-400'
-                          : 'hover:bg-white/5'
+                          ? 'bg-[#1B201B] border-l-2 border-[#C6FF4D]'
+                          : 'hover:bg-[#1B201B]/50'
                       }`}
                     >
                       {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-sm font-700 text-white shrink-0 mt-0.5 relative">
+                      <div className="w-10 h-10 rounded-full bg-[#202620] border border-[#30372F] flex items-center justify-center text-sm font-700 text-[#C6FF4D] shrink-0 mt-0.5 relative">
                         {participant?.username?.[0]?.toUpperCase() || '?'}
                         {c.unreadCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-surface-900 text-white text-[9px] font-bold flex items-center justify-center">
+                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#C6FF4D] border-2 border-[#101211] text-[#101211] text-[9px] font-bold flex items-center justify-center tabular-nums">
                             {c.unreadCount}
                           </span>
                         )}
@@ -549,29 +549,29 @@ export default function CampusChatPage() {
                       {/* Content preview */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="font-700 text-xs text-slate-200 truncate">
+                          <span className="font-700 text-xs text-[#F4F5F0] truncate">
                             @{participant?.username || 'Student'}
                           </span>
-                          <span className="text-[10px] text-slate-500 shrink-0">
+                          <span className="text-[10px] text-[#747D72] shrink-0 tabular-nums">
                             {c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}
                           </span>
                         </div>
 
                         {/* Context pill: Auction or Request */}
                         {isAuction && c.listing && (
-                          <div className="flex items-center gap-1 text-[10px] text-brand-300 truncate mt-0.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
+                          <div className="flex items-center gap-1 text-[10px] text-[#C6FF4D] truncate mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF4D] shrink-0" />
                             <span className="truncate">Auction: {c.listing.title}</span>
                           </div>
                         )}
                         {isRequest && c.itemRequest && (
-                          <div className="flex items-center gap-1 text-[10px] text-amber-300 truncate mt-0.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                          <div className="flex items-center gap-1 text-[10px] text-[#FFC857] truncate mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FFC857] shrink-0" />
                             <span className="truncate">Wanted: {c.itemRequest.title}</span>
                           </div>
                         )}
 
-                        <p className="text-xs text-slate-400 truncate mt-1">
+                        <p className="text-xs text-[#A1A79E] truncate mt-1">
                           {c.lastMessagePreview || 'Conversation opened'}
                         </p>
                       </div>
@@ -672,38 +672,39 @@ export default function CampusChatPage() {
         </div>
 
         {/* Right Panel (Active Conversation Thread) */}
+        {/* Right Panel (Active Conversation Thread) */}
         <div
-          className={`md:col-span-7 lg:col-span-8 flex flex-col min-h-0 bg-surface-900/40 ${
+          className={`md:col-span-7 lg:col-span-8 flex flex-col min-h-0 bg-[#151815] ${
             !showMobileChat ? 'hidden md:flex' : 'flex'
           }`}
         >
           {selectedConv ? (
             <>
               {/* Conversation Header */}
-              <div className="p-3.5 bg-surface-800/80 border-b border-white/8 flex items-center justify-between gap-3 shrink-0">
+              <div className="p-3.5 bg-[#1B201B] border-b border-[#30372F] flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3">
                   {/* Mobile back button */}
                   <button
                     onClick={() => setShowMobileChat(false)}
-                    className="md:hidden p-1.5 text-slate-400 hover:text-slate-200"
+                    className="md:hidden p-1.5 text-[#A1A79E] hover:text-[#F4F5F0]"
                   >
                     <ArrowLeft size={18} />
                   </button>
 
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-sm font-700 text-white shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#202620] border border-[#30372F] flex items-center justify-center text-sm font-700 text-[#C6FF4D] shrink-0">
                     {otherParticipant?.username?.[0]?.toUpperCase() || '?'}
                   </div>
 
                   <div>
-                    <h3 className="font-700 text-sm text-slate-100 flex items-center gap-2">
+                    <h3 className="font-700 text-sm text-[#F4F5F0] flex items-center gap-2">
                       @{otherParticipant?.username || 'Student Peer'}
                       {otherParticipant?.campusId && (
-                        <span className="text-[10px] text-slate-400 font-normal">
+                        <span className="text-[10px] text-[#747D72] font-normal">
                           · {otherParticipant.campusId}
                         </span>
                       )}
                     </h3>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-[#A1A79E]">
                       {selectedConv.type === 'auction' ? 'Auction Discussion' : selectedConv.type === 'request' ? 'Item Request Discussion' : 'Direct Campus Message'}
                     </p>
                   </div>
@@ -713,7 +714,7 @@ export default function CampusChatPage() {
                 {selectedConv.type === 'auction' && selectedConv.listing && (
                   <Link
                     to={`/listings/${selectedConv.listing._id}`}
-                    className="hidden sm:flex items-center gap-2 text-xs bg-brand-500/10 border border-brand-500/20 text-brand-300 py-1 px-2.5 rounded-xl hover:bg-brand-500/20 transition-colors"
+                    className="hidden sm:flex items-center gap-2 text-xs bg-[#C6FF4D]/10 border border-[#C6FF4D]/20 text-[#C6FF4D] py-1 px-2.5 rounded-xl hover:bg-[#C6FF4D]/20 transition-colors"
                   >
                     <span className="truncate max-w-[120px] font-600">{selectedConv.listing.title}</span>
                     <ChevronRight size={13} />
@@ -722,16 +723,16 @@ export default function CampusChatPage() {
               </div>
 
               {/* Messages Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#101211]/50">
                 {loadingMessages ? (
-                  <div className="h-full flex items-center justify-center text-slate-500 text-xs">
+                  <div className="h-full flex items-center justify-center text-[#747D72] text-xs">
                     Loading conversation messages…
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
-                    <MessageSquare size={36} className="text-slate-600 mb-2" />
-                    <p className="text-sm font-600 text-slate-300">Conversation started</p>
-                    <p className="text-xs text-slate-500 max-w-xs mt-1">
+                  <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#A1A79E]">
+                    <MessageSquare size={36} className="text-[#30372F] mb-2" />
+                    <p className="text-sm font-600 text-[#F4F5F0]">Conversation started</p>
+                    <p className="text-xs text-[#747D72] max-w-xs mt-1">
                       Send a message to introduce yourself or clarify terms, specs, or handover details.
                     </p>
                   </div>
@@ -746,12 +747,12 @@ export default function CampusChatPage() {
                           isMine ? 'ml-auto' : 'mr-auto'
                         }`}
                       >
-                        <div className="flex items-center gap-1.5 mb-1 text-[11px] text-slate-400 px-1">
-                          <span className="font-600 text-slate-300">
+                        <div className="flex items-center gap-1.5 mb-1 text-[11px] text-[#747D72] px-1">
+                          <span className="font-600 text-[#A1A79E]">
                             {isMine ? 'You' : `@${m.sender?.username}`}
                           </span>
                           <span>·</span>
-                          <span>
+                          <span className="tabular-nums">
                             {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -759,8 +760,8 @@ export default function CampusChatPage() {
                         <div
                           className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                             isMine
-                              ? 'bg-brand-600 text-white rounded-br-xs shadow-md'
-                              : 'bg-surface-800 text-slate-200 border border-white/5 rounded-bl-xs'
+                              ? 'bg-[#C6FF4D] text-[#101211] font-medium rounded-br-xs shadow-sm'
+                              : 'bg-[#1B201B] text-[#F4F5F0] border border-[#30372F] rounded-bl-xs'
                           }`}
                         >
                           {m.content && <p className="whitespace-pre-wrap break-words">{m.content}</p>}
@@ -773,7 +774,7 @@ export default function CampusChatPage() {
                                 return (
                                   <div
                                     key={idx}
-                                    className="rounded-lg overflow-hidden border border-white/10 bg-black/20"
+                                    className="rounded-lg overflow-hidden border border-[#30372F] bg-black/30"
                                   >
                                     {isImg ? (
                                       <a href={att.url} target="_blank" rel="noopener noreferrer">
@@ -788,11 +789,11 @@ export default function CampusChatPage() {
                                         href={att.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-2 p-2 text-xs text-brand-300 hover:underline"
+                                        className="flex items-center gap-2 p-2 text-xs text-[#C6FF4D] hover:underline"
                                       >
                                         <FileText size={16} />
                                         <span className="truncate">{att.originalName}</span>
-                                        <span className="text-[10px] text-slate-400">
+                                        <span className="text-[10px] text-[#747D72]">
                                           ({Math.round(att.size / 1024)} KB)
                                         </span>
                                       </a>
@@ -806,9 +807,9 @@ export default function CampusChatPage() {
 
                         {/* Read receipts */}
                         {isMine && (
-                          <div className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-0.5 pr-1">
+                          <div className="text-[10px] text-[#747D72] mt-0.5 flex items-center gap-0.5 pr-1">
                             {isRead ? (
-                              <span className="flex items-center gap-0.5 text-brand-400">
+                              <span className="flex items-center gap-0.5 text-[#C6FF4D]">
                                 <CheckCheck size={11} /> Read
                               </span>
                             ) : (
@@ -825,8 +826,8 @@ export default function CampusChatPage() {
 
                 {/* Typing indicator */}
                 {otherUserTyping && (
-                  <div className="text-xs text-brand-400 italic px-2 animate-pulse flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-ping" />
+                  <div className="text-xs text-[#C6FF4D] italic px-2 animate-pulse flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF4D] animate-ping" />
                     {otherUserTyping}
                   </div>
                 )}
@@ -835,18 +836,18 @@ export default function CampusChatPage() {
 
               {/* Pending attachments preview */}
               {attachments.length > 0 && (
-                <div className="px-3 py-2 bg-surface-800/90 border-t border-white/5 flex items-center gap-2 overflow-x-auto">
+                <div className="px-3 py-2 bg-[#1B201B] border-t border-[#30372F] flex items-center gap-2 overflow-x-auto">
                   {attachments.map((file, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-1.5 bg-surface-700 text-slate-200 text-xs px-2.5 py-1 rounded-lg border border-white/10 shrink-0"
+                      className="flex items-center gap-1.5 bg-[#202620] text-[#F4F5F0] text-xs px-2.5 py-1 rounded-lg border border-[#30372F] shrink-0"
                     >
-                      <Paperclip size={12} className="text-brand-400" />
+                      <Paperclip size={12} className="text-[#C6FF4D]" />
                       <span className="truncate max-w-[120px]">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => removeAttachment(i)}
-                        className="text-slate-400 hover:text-rose-400 ml-1"
+                        className="text-[#747D72] hover:text-[#FF7373] ml-1"
                       >
                         <X size={12} />
                       </button>
@@ -856,7 +857,7 @@ export default function CampusChatPage() {
               )}
 
               {/* Message Input Form */}
-              <form onSubmit={handleSendMessage} className="p-3 bg-surface-800/80 border-t border-white/8 flex items-center gap-2 shrink-0">
+              <form onSubmit={handleSendMessage} className="p-3 bg-[#151815] border-t border-[#30372F] flex items-center gap-2 shrink-0">
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -868,7 +869,7 @@ export default function CampusChatPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-2 text-slate-400 hover:text-brand-400 hover:bg-white/5 rounded-xl transition-colors shrink-0"
+                  className="p-2 text-[#747D72] hover:text-[#C6FF4D] hover:bg-[#202620] rounded-xl transition-colors shrink-0"
                   title="Attach image or PDF document"
                 >
                   <Paperclip size={18} />
@@ -880,7 +881,7 @@ export default function CampusChatPage() {
                   onChange={handleTyping}
                   placeholder="Type a message to peer…"
                   maxLength={2000}
-                  className="input flex-1 text-sm py-2 px-3 bg-surface-900 border-white/10 focus:border-brand-400"
+                  className="input flex-1 text-sm py-2 px-3 bg-[#101211] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
                 />
 
                 <button
@@ -895,8 +896,8 @@ export default function CampusChatPage() {
             </>
           ) : (
             /* Empty state when no conversation is selected */
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
-              <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mb-4">
+            <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#A1A79E]">
+              <div className="w-16 h-16 rounded-2xl bg-[#1B201B] border border-[#30372F] flex items-center justify-center text-[#C6FF4D] mb-4">
                 <MessageSquare size={32} />
               </div>
               <h3 className="font-display font-700 text-lg text-slate-200">Campus Marketplace Chat</h3>
