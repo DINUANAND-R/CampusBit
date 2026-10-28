@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const Listing = require('../models/Listing');
+const { queueNewListingNotification } = require('../services/notificationService');
 
 /**
  * Checks for scheduled listings whose publication time has arrived.
@@ -73,6 +74,11 @@ const publishDueListings = async (io) => {
             endsAt: published.endsAt,
           });
         }
+
+        // Trigger durable, idempotent notification campaign to all eligible users
+        queueNewListingNotification(published, io).catch((err) => {
+          console.error(`[ScheduledPublisher] Failed to queue notification for listing ${published._id}:`, err);
+        });
       }
     }
   } catch (err) {

@@ -15,7 +15,15 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['message', 'auction_question', 'auction_reply', 'item_request_reply', 'bid', 'system'],
+      enum: [
+        'message',
+        'auction_question',
+        'auction_reply',
+        'item_request_reply',
+        'bid',
+        'system',
+        'NEW_LISTING',
+      ],
       default: 'message',
       required: true,
     },
@@ -32,6 +40,14 @@ const notificationSchema = new mongoose.Schema(
     link: {
       type: String,
       default: '',
+    },
+    imageUrl: {
+      type: String,
+      default: '',
+    },
+    startingPrice: {
+      type: Number,
+      default: null,
     },
     conversation: {
       type: mongoose.Schema.Types.ObjectId,
@@ -52,10 +68,17 @@ const notificationSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    deduplicationKey: {
+      type: String,
+      default: null,
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
+notificationSchema.index({ recipient: 1, deduplicationKey: 1 }, { unique: true, sparse: true });
 notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
+notificationSchema.index({ recipient: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);

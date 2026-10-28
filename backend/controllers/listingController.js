@@ -2,6 +2,7 @@ const Listing = require('../models/Listing');
 const Bid = require('../models/Bid');
 const Handover = require('../models/Handover');
 const { deleteUploadedFiles, deleteListingFile } = require('../middleware/uploadMiddleware');
+const { queueNewListingNotification } = require('../services/notificationService');
 
 // GET /api/listings
 // Public browsing and search: ONLY returns active, non-expired auctions
@@ -222,6 +223,14 @@ exports.createListing = async (req, res, next) => {
       startAt,
       endsAt,
     });
+
+    // If published immediately, queue new-listing notification for all eligible users
+    if (listing.status === 'active') {
+      const io = req.app?.get('io');
+      queueNewListingNotification(listing, io).catch((err) => {
+        console.error(`[ListingController] Failed to queue notification for listing ${listing._id}:`, err);
+      });
+    }
 
     res.status(201).json({ listing });
   } catch (err) {

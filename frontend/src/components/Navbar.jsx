@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { conversationsApi } from '../api';
+import NotificationCenter from './NotificationCenter';
 import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -90,6 +91,7 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
+              <NotificationCenter />
               {user.role === 'admin' && (
                 <Link
                   to="/admin"

@@ -34,6 +34,20 @@ exports.getNotifications = async (req, res, next) => {
   }
 };
 
+// GET /api/notifications/unread-count
+exports.getUnreadCount = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const unreadCount = await Notification.countDocuments({
+      recipient: userId,
+      isRead: false,
+    });
+    res.json({ unreadCount });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // PATCH /api/notifications/:id/read
 exports.markNotificationRead = async (req, res, next) => {
   try {
@@ -48,7 +62,12 @@ exports.markNotificationRead = async (req, res, next) => {
 
     if (!notif) return res.status(404).json({ message: 'Notification not found' });
 
-    res.json({ notification: notif });
+    const unreadCount = await Notification.countDocuments({
+      recipient: userId,
+      isRead: false,
+    });
+
+    res.json({ notification: notif, unreadCount });
   } catch (err) {
     next(err);
   }
@@ -63,7 +82,7 @@ exports.markAllNotificationsRead = async (req, res, next) => {
       { isRead: true, readAt: new Date() }
     );
 
-    res.json({ message: 'All notifications marked as read' });
+    res.json({ message: 'All notifications marked as read', unreadCount: 0 });
   } catch (err) {
     next(err);
   }

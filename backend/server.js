@@ -19,6 +19,7 @@ const notificationRoutes = require('./routes/notifications');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
 const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
+const { setIO: setNotificationIO, resumePendingJobs } = require('./services/notificationService');
 
 // ── Connect to MongoDB ────────────────────────────────────────────────────────
 connectDB();
@@ -42,9 +43,11 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+setNotificationIO(io);
 registerSocketHandlers(io);
 startAuctionCloser(io);
 startScheduledPublisher(io);
+resumePendingJobs(io);
 app.set('io', io);
 
 // ── Express middleware ────────────────────────────────────────────────────────
