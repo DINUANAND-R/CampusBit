@@ -34,6 +34,19 @@ exports.approve = async (req, res, next) => {
     handover.handoverCode = code;
     await handover.save();
 
+    await handover.populate('seller', 'username');
+    await handover.populate('buyer', 'username');
+
+    // Notify buyer via socket
+    const io = req.app.get('io');
+    if (io) {
+      const buyerId = handover.buyer?._id || handover.buyer;
+      io.to(`user:${buyerId}`).emit('handover:approved', {
+        listingId: listing._id,
+        handoverId: handover._id,
+      });
+    }
+
     res.json({ message: 'Approved', handoverCode: code, handover });
   } catch (err) {
     next(err);
@@ -136,6 +149,19 @@ exports.confirm = async (req, res, next) => {
         },
       }
     ).catch(() => {});
+
+    await handover.populate('seller', 'username');
+    await handover.populate('buyer', 'username');
+
+    // Notify seller via socket
+    const io = req.app.get('io');
+    if (io) {
+      const sellerId = handover.seller?._id || handover.seller;
+      io.to(`user:${sellerId}`).emit('handover:completed', {
+        listingId: listing._id,
+        handoverId: handover._id,
+      });
+    }
 
     res.json({ message: 'Handover complete!', handover });
   } catch (err) {

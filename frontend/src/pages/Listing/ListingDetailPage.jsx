@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
   Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare, Handshake,
-  ShieldCheck, Lock, Sparkles, Play, Film
+  ShieldCheck, Lock, Sparkles, Play, Film, Key
 } from 'lucide-react';
 import { getImageUrl, getVideoUrl } from '../../utils/imageUrl';
 
@@ -825,16 +825,27 @@ export default function ListingDetailPage() {
               </p>
             )}
 
-            {/* Handover & Exchange link for closed auctions */}
+            {/* Handover OTP link for closed auctions */}
             {(listing.status === 'closed' || listing.status === 'completed') && (
               <div className="flex flex-col gap-2 mt-2">
-                <Link to="/exchange" id="exchange-link"
-                  className="btn btn-primary w-full flex items-center justify-center gap-2">
-                  <Handshake size={16} /> Manage Product Exchange
+                <Link
+                  to={`/handover/${id}`}
+                  id="handover-link"
+                  className="btn btn-primary w-full flex items-center justify-center gap-2 py-3 text-sm font-bold"
+                >
+                  <Key size={16} />
+                  <span>
+                    {listing.status === 'completed'
+                      ? 'Handover Completed (View Receipt)'
+                      : 'Product Handover (OTP Verification)'}
+                  </span>
                 </Link>
-                <Link to={`/handover/${id}`} id="handover-link"
-                  className="btn btn-secondary w-full text-xs flex items-center justify-center gap-1">
-                  <ChevronRight size={14} /> Legacy Handover View
+                <Link
+                  to="/exchange"
+                  id="exchange-link"
+                  className="btn btn-secondary w-full text-xs flex items-center justify-center gap-1.5 text-[#A1A79E] hover:text-[#F4F5F0]"
+                >
+                  <Handshake size={14} className="text-[#C6FF4D]" /> Campus Exchange & Meeting Dashboard
                 </Link>
               </div>
             )}

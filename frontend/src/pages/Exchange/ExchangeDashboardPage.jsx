@@ -22,6 +22,7 @@ import {
   Check,
   Send,
   ExternalLink,
+  Key,
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -386,7 +387,17 @@ export default function ExchangeDashboardPage() {
                   </div>
 
                   {/* Actions Right */}
-                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                    {/* Handover OTP Button */}
+                    <Link
+                      to={`/handover/${exchange.listing?._id}`}
+                      id={`handover-otp-${exchange._id}`}
+                      className="btn btn-primary btn-sm flex items-center gap-1.5 text-xs font-bold shadow-md shadow-brand-500/20"
+                      title="Open Handover OTP Code Verification"
+                    >
+                      <Key size={13} /> {exchange.status === 'COMPLETED' ? 'OTP Receipt' : isSeller ? 'Handover OTP' : 'Enter OTP'}
+                    </Link>
+
                     {/* Chat Button */}
                     <Link
                       to={`/chat?conv=${exchange.conversation?._id || ''}`}
