@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { listingsApi, bidsApi, reportsApi } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import Countdown from '../../components/Countdown';
+import AuctionDiscussionBox from '../../components/AuctionDiscussionBox';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye, MessageSquare
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -20,9 +21,12 @@ const conditionBadge = {
 
 export default function ListingDetailPage() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user }   = useAuth();
   const { socket } = useSocket();
   const navigate   = useNavigate();
+
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'discussion' ? 'discussion' : 'bids');
 
   const [listing, setListing] = useState(null);
   const [bids, setBids]       = useState([]);
@@ -379,6 +383,15 @@ export default function ListingDetailPage() {
               {user && !isSeller && (
                 <button
                   type="button"
+                  onClick={() => { setActiveTab('discussion'); setSearchParams({ tab: 'discussion' }); }}
+                  className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1 transition-colors py-1 px-2 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 border border-brand-400/20"
+                >
+                  <MessageSquare size={12} /> Ask Seller
+                </button>
+              )}
+              {user && !isSeller && (
+                <button
+                  type="button"
                   onClick={() => setShowReportModal(true)}
                   className="ml-auto text-xs text-slate-500 hover:text-rose-400 flex items-center gap-1 transition-colors py-1 px-2 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
                   title="Report listing to administrators"
@@ -390,10 +403,44 @@ export default function ListingDetailPage() {
           </div>
         </div>
 
-        {/* Right — bid panel */}
+        {/* Right — bid panel & discussion switcher */}
         <div className="flex flex-col gap-4">
-          {/* Price + timer */}
-          <div className="glass rounded-2xl p-6">
+          {/* Tab Switcher */}
+          <div className="glass rounded-xl p-1.5 flex items-center gap-1 border border-white/10">
+            <button
+              id="tab-bids"
+              type="button"
+              onClick={() => { setActiveTab('bids'); setSearchParams({}); }}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'bids'
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              <Gavel size={14} />
+              <span>Bidding & History</span>
+            </button>
+            <button
+              id="tab-discussion"
+              type="button"
+              onClick={() => { setActiveTab('discussion'); setSearchParams({ tab: 'discussion' }); }}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-700 transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'discussion'
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              <MessageSquare size={14} />
+              <span>{isSeller ? 'Buyer Inquiries' : 'Ask Seller'}</span>
+            </button>
+          </div>
+
+          {activeTab === 'discussion' ? (
+            <AuctionDiscussionBox listing={listing} />
+          ) : (
+            <>
+              {/* Price + timer */}
+              <div className="glass rounded-2xl p-6">
             <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">
               {isScheduled ? 'Starting price' : 'Current price'}
             </p>
@@ -528,8 +575,10 @@ export default function ListingDetailPage() {
               )}
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
+    </div>
+  </div>
 
       {/* Confirmation Dialog for Cancellation */}
       {showCancelModal && (

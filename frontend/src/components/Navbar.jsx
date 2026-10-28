@@ -1,12 +1,42 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Gavel, LogOut, Plus, LayoutDashboard, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useSocket } from '../context/SocketContext';
+import { conversationsApi } from '../api';
+import { Gavel, LogOut, Plus, LayoutDashboard, Search, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { socket } = useSocket();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnread = async () => {
+      try {
+        const { data } = await conversationsApi.getUnreadCount();
+        setUnreadCount(data.unreadCount || 0);
+      } catch {}
+    };
+
+    fetchUnread();
+
+    if (socket) {
+      const handleUpdate = () => fetchUnread();
+      socket.on('conversation:update', handleUpdate);
+      socket.on('notification:new', handleUpdate);
+      return () => {
+        socket.off('conversation:update', handleUpdate);
+        socket.off('notification:new', handleUpdate);
+      };
+    }
+  }, [user, socket]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -50,6 +80,15 @@ export default function Navbar() {
               <Link to="/dashboard" className="btn btn-secondary btn-sm">
                 <LayoutDashboard size={15} />
                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+              <Link to="/chat" id="nav-chat-link" className="btn btn-secondary btn-sm relative flex items-center gap-1.5">
+                <MessageSquare size={15} className="text-brand-400" />
+                <span className="hidden sm:inline">Campus Chat</span>
+                {unreadCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
               {user.role === 'admin' && (
                 <Link

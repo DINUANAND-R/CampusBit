@@ -13,6 +13,9 @@ const handoverRoutes = require('./routes/handover');
 const sellerAnalyticsRoutes = require('./routes/sellerAnalytics');
 const adminRoutes = require('./routes/admin');
 const reportRoutes = require('./routes/reports');
+const conversationRoutes = require('./routes/conversations');
+const itemRequestRoutes = require('./routes/itemRequests');
+const notificationRoutes = require('./routes/notifications');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
 const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
@@ -34,7 +37,7 @@ const allowedOrigins = [
 // ── Socket.IO ─────────────────────────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => callback(null, true),
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -70,6 +73,14 @@ app.use(
     maxAge: '1d',
   })
 );
+app.use(
+  '/uploads/attachments',
+  express.static(path.join(__dirname, 'uploads', 'attachments'), {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '1d',
+  })
+);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
@@ -79,6 +90,9 @@ app.use('/api/handover', handoverRoutes);
 app.use('/api/seller/analytics', sellerAnalyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/item-requests', itemRequestRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

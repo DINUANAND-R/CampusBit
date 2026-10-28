@@ -10,10 +10,24 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const s = io(SOCKET_URL, { autoConnect: true, transports: ['websocket', 'polling'] });
+    const token = localStorage.getItem('access_token');
+    const s = io(SOCKET_URL, {
+      autoConnect: true,
+      transports: ['websocket', 'polling'],
+      auth: { token },
+    });
     socketRef.current = s;
-    s.on('connect', () => setConnected(true));
+
+    s.on('connect', () => {
+      setConnected(true);
+      const currentToken = localStorage.getItem('access_token');
+      if (currentToken) {
+        s.emit('user:auth', currentToken);
+      }
+    });
+
     s.on('disconnect', () => setConnected(false));
+
     return () => { s.disconnect(); };
   }, []);
 

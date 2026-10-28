@@ -96,4 +96,34 @@ export const reportsApi = {
   myReports: () => api.get('/reports/my'),
 };
 
+// ── Conversations & Messages ──────────────────────────────────────────────────
+export const conversationsApi = {
+  getAll: (params) => api.get('/conversations', { params }),
+  getUnreadCount: () => api.get('/conversations/unread/count'),
+  getOne: (id) => api.get(`/conversations/${id}`),
+  getMessages: (id, params) => api.get(`/conversations/${id}/messages`, { params }),
+  sendMessage: (id, data) => api.post(`/conversations/${id}/messages`, data),
+  markAsRead: (id) => api.patch(`/conversations/${id}/read`),
+  getOrCreateAuction: (listingId) => api.post(`/listings/${listingId}/conversations`),
+  getListingConversations: (listingId) => api.get(`/listings/${listingId}/conversations`),
+  getOrCreateDirect: (recipientId) => api.post('/conversations/direct', { recipientId }),
+  getOrCreateRequest: (requestId) => api.post('/conversations/request', { requestId }),
+};
+
+// ── Item Requests (Looking-for-item) ──────────────────────────────────────────
+export const itemRequestsApi = {
+  getAll: (params) => api.get('/item-requests', { params }),
+  getOne: (id) => api.get(`/item-requests/${id}`),
+  create: (data) => api.post('/item-requests', data),
+  update: (id, data) => api.patch(`/item-requests/${id}`, data),
+  updateStatus: (id, status) => api.patch(`/item-requests/${id}/status`, { status }),
+};
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+export const notificationsApi = {
+  getAll: (params) => api.get('/notifications', { params }),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.patch('/notifications/read-all'),
+};
+
 export default api;

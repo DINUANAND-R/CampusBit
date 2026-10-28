@@ -17,6 +17,7 @@ import AdminUsersPage      from './pages/Admin/AdminUsersPage';
 import AdminListingsPage   from './pages/Admin/AdminListingsPage';
 import AdminReportsPage    from './pages/Admin/AdminReportsPage';
 import AdminAnalyticsPage  from './pages/Admin/AdminAnalyticsPage';
+import CampusChatPage      from './pages/Chat/CampusChatPage';
 import './App.css';
 
 // Auth guard
@@ -61,6 +62,7 @@ function AppRoutes() {
           <Route path="/listings/:id/edit" element={<PrivateRoute><EditListingPage /></PrivateRoute>} />
           <Route path="/listings/new"     element={<PrivateRoute><CreateListingPage /></PrivateRoute>} />
           <Route path="/dashboard"        element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path="/chat"             element={<PrivateRoute><CampusChatPage /></PrivateRoute>} />
           <Route path="/handover/:id"     element={<PrivateRoute><HandoverPage /></PrivateRoute>} />
           
           {/* Protected Admin Routes */}
