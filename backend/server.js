@@ -10,6 +10,9 @@ const authRoutes = require('./routes/auth');
 const listingRoutes = require('./routes/listings');
 const bidRoutes = require('./routes/bids');
 const handoverRoutes = require('./routes/handover');
+const sellerAnalyticsRoutes = require('./routes/sellerAnalytics');
+const adminRoutes = require('./routes/admin');
+const reportRoutes = require('./routes/reports');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
 const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
@@ -73,6 +76,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/handover', handoverRoutes);
+app.use('/api/seller/analytics', sellerAnalyticsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

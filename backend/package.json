@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "node test-suite.js && node test-multer.js",
+    "test": "node test-suite.js && node test-multer.js && node test-scheduling-cancellation.js",
     "test:suite": "node test-suite.js",
-    "test:multer": "node test-multer.js"
+    "test:multer": "node test-multer.js",
+    "test:analytics": "node test-analytics-admin.js",
+    "admin:promote": "node scripts/promote-admin.js"
   },
   "keywords": [],
   "author": "",

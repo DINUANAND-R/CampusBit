@@ -16,9 +16,10 @@ exports.getListings = async (req, res, next) => {
     } = req.query;
 
     const now = new Date();
-    // Exclude SCHEDULED, CANCELLED, and closed/expired listings from public feeds
+    // Exclude SCHEDULED, CANCELLED, moderated, and closed/expired listings from public feeds
     const filter = {
       status: 'active',
+      isModerated: { $ne: true },
       endsAt: { $gt: now },
       $or: [
         { publishAt: null },
@@ -61,7 +62,7 @@ exports.getListing = async (req, res, next) => {
 
     if (!listing) return res.status(404).json({ message: 'Listing not found' });
 
-    // Restrict unpublished (scheduled) or cancelled listings to owner or admin only
+    // Restrict unpublished (scheduled), cancelled, or moderated listings to owner or admin only
     const isOwnerOrAdmin =
       req.user &&
       (listing.seller._id.toString() === req.user._id.toString() || req.user.role === 'admin');
@@ -71,8 +72,23 @@ exports.getListing = async (req, res, next) => {
       listing.status === 'scheduled' ||
       (listing.publishAt && new Date(listing.publishAt) > now);
 
-    if ((isUnpublished || listing.status === 'cancelled') && !isOwnerOrAdmin) {
+    if ((isUnpublished || listing.status === 'cancelled' || listing.isModerated) && !isOwnerOrAdmin) {
       return res.status(404).json({ message: 'Listing not found or not currently active' });
+    }
+
+    // Track listing view (safeguarded against duplicate immediate spam)
+    if (!isOwnerOrAdmin) {
+      const viewerId = req.user
+        ? String(req.user._id)
+        : (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'guest');
+
+      Listing.updateOne(
+        { _id: listing._id, viewedIps: { $ne: viewerId } },
+        {
+          $inc: { viewsCount: 1 },
+          $push: { viewedIps: { $each: [viewerId], $slice: -200 } },
+        }
+      ).exec().catch(() => {});
     }
 
     res.json({ listing });

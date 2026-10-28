@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { listingsApi, bidsApi } from '../../api';
+import { listingsApi, bidsApi, reportsApi } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import Countdown from '../../components/Countdown';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X, Flag, Eye
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -35,6 +35,10 @@ export default function ListingDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportCategory, setReportCategory] = useState('inappropriate_content');
+  const [reportDescription, setReportDescription] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
   const bidListRef = useRef(null);
 
   // Load listing + bid history
@@ -167,6 +171,35 @@ export default function ListingDetailPage() {
       toast.error(err.response?.data?.message || 'Failed to cancel listing');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleReportSubmit = async (e) => {
+    e?.preventDefault();
+    if (!user) {
+      toast.error('Please login to report this listing');
+      navigate('/login');
+      return;
+    }
+    if (!reportDescription.trim()) {
+      toast.error('Please provide a description of the issue');
+      return;
+    }
+    setSubmittingReport(true);
+    try {
+      await reportsApi.create({
+        targetType: 'listing',
+        targetId: id,
+        category: reportCategory,
+        description: reportDescription.trim()
+      });
+      toast.success('Report submitted to administrators for review');
+      setShowReportModal(false);
+      setReportDescription('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit report');
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -331,10 +364,28 @@ export default function ListingDetailPage() {
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed">{listing.description}</p>
-            <div className="flex items-center gap-3 text-sm text-slate-400">
-              <User size={14} />
-              <span>Sold by <span className="text-slate-200 font-600">@{listing.seller?.username}</span></span>
-              {listing.seller?.campusId && <span>· Campus ID: {listing.seller.campusId}</span>}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <User size={14} />
+                <span>Sold by <span className="text-slate-200 font-600">@{listing.seller?.username}</span></span>
+                {listing.seller?.campusId && <span>· Campus ID: {listing.seller.campusId}</span>}
+              </div>
+              {listing.viewsCount !== undefined && (
+                <div className="flex items-center gap-1 text-xs text-slate-400 bg-surface-800/80 px-2 py-0.5 rounded-md border border-white/5">
+                  <Eye size={12} className="text-brand-400" />
+                  <span>{listing.viewsCount} views</span>
+                </div>
+              )}
+              {user && !isSeller && (
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(true)}
+                  className="ml-auto text-xs text-slate-500 hover:text-rose-400 flex items-center gap-1 transition-colors py-1 px-2 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
+                  title="Report listing to administrators"
+                >
+                  <Flag size={12} /> Report Listing
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -535,6 +586,82 @@ export default function ListingDetailPage() {
                 {cancelling ? 'Cancelling…' : 'Yes, Cancel Listing'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Listing Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass rounded-2xl max-w-md w-full p-6 border border-white/10 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-700 text-lg text-slate-100 flex items-center gap-2 text-rose-400">
+                <Flag size={18} /> Report Listing
+              </h3>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="text-slate-400 hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-slate-300 text-sm">
+              Report <strong className="text-slate-100">"{listing.title}"</strong> to administrators if it violates campus rules.
+            </p>
+
+            <form onSubmit={handleReportSubmit} className="flex flex-col gap-3">
+              <div>
+                <label className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">
+                  Report Reason
+                </label>
+                <select
+                  className="input text-sm"
+                  value={reportCategory}
+                  onChange={(e) => setReportCategory(e.target.value)}
+                >
+                  <option value="inappropriate_content">Prohibited or Inappropriate Item</option>
+                  <option value="counterfeit_item">Counterfeit / Fake Item</option>
+                  <option value="misleading_information">Misleading or Inaccurate Description</option>
+                  <option value="harassment">Harassment or Abusive Content</option>
+                  <option value="shill_bidding">Suspected Shill Bidding / Manipulation</option>
+                  <option value="spam">Spam or Unsolicited Promotion</option>
+                  <option value="other">Other Campus Policy Violation</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">
+                  Details / Evidence *
+                </label>
+                <textarea
+                  className="input text-sm min-h-[90px] resize-none"
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  placeholder="Explain why this listing should be reviewed by administrators..."
+                  maxLength={500}
+                  required
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="btn btn-secondary flex-1"
+                  disabled={submittingReport}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReport || !reportDescription.trim()}
+                  className="btn btn-danger flex-1 flex items-center justify-center gap-1.5"
+                >
+                  {submittingReport ? 'Submitting…' : 'Submit Report'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

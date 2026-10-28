@@ -54,6 +54,12 @@ const listingSchema = new mongoose.Schema(
     publishedAt: { type: Date, default: null },
     cancelledAt: { type: Date, default: null },
     cancellationReason: { type: String, trim: true, default: '' },
+    viewsCount: { type: Number, default: 0 },
+    viewedIps: { type: [String], default: [] },
+    isModerated: { type: Boolean, default: false },
+    moderationReason: { type: String, default: '' },
+    moderatedAt: { type: Date, default: null },
+    moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     startAt: { type: Date, default: Date.now },
     endsAt: { type: Date, required: true },
     extensionCount: { type: Number, default: 0 },
@@ -76,7 +82,8 @@ listingSchema.pre('save', function () {
 // Indexes
 listingSchema.index({ status: 1, publishAt: 1 });
 listingSchema.index({ status: 1, endsAt: 1 });
-listingSchema.index({ seller: 1 });
+listingSchema.index({ isModerated: 1 });
+listingSchema.index({ seller: 1, createdAt: -1 });
 listingSchema.index({ title: 'text', description: 'text' });
 listingSchema.index({ category: 1 });
 

@@ -11,6 +11,12 @@ const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-passwordHash');
     if (!user) return res.status(401).json({ message: 'User not found' });
+    if (user.status === 'suspended' || user.status === 'banned') {
+      return res.status(403).json({
+        message: `Account is ${user.status}. Reason: ${user.suspensionReason || 'Account suspended by administrator'}.`,
+        accountStatus: user.status,
+      });
+    }
     req.user = user;
     next();
   } catch (err) {

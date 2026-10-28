@@ -9,6 +9,7 @@ import {
   Edit3, Trash2, Calendar, Clock, AlertTriangle, X, Check
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
+import SellerAnalyticsView from './SellerAnalyticsView';
 
 const statusColor = {
   active:    'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
@@ -120,14 +121,18 @@ export default function DashboardPage() {
 
       {/* Main Tabs */}
       <div className="flex gap-2 mb-6 border-b border-surface-600 pb-4">
-        {['listings', 'bids'].map((t) => (
+        {[
+          { id: 'listings', label: '📦 My Listings' },
+          { id: 'analytics', label: '📊 Seller Analytics' },
+          { id: 'bids', label: '🔨 My Bids' },
+        ].map(({ id, label }) => (
           <button
-            key={t}
-            id={`tab-${t}`}
-            onClick={() => setTab(t)}
-            className={`btn btn-sm capitalize ${tab === t ? 'btn-primary' : 'btn-secondary'}`}
+            key={id}
+            id={`tab-${id}`}
+            onClick={() => setTab(id)}
+            className={`btn btn-sm ${tab === id ? 'btn-primary' : 'btn-secondary'}`}
           >
-            {t === 'listings' ? '📦 My Listings' : '🔨 My Bids'}
+            {label}
           </button>
         ))}
       </div>
@@ -309,6 +314,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+      ) : tab === 'analytics' ? (
+        <SellerAnalyticsView />
       ) : (
         /* My Bids Tab */
         <div className="flex flex-col gap-3">

@@ -11,6 +11,12 @@ import CreateListingPage   from './pages/Listing/CreateListingPage';
 import EditListingPage     from './pages/Listing/EditListingPage';
 import DashboardPage       from './pages/Dashboard/DashboardPage';
 import HandoverPage        from './pages/Handover/HandoverPage';
+import AdminLayout         from './pages/Admin/AdminLayout';
+import AdminOverviewPage   from './pages/Admin/AdminOverviewPage';
+import AdminUsersPage      from './pages/Admin/AdminUsersPage';
+import AdminListingsPage   from './pages/Admin/AdminListingsPage';
+import AdminReportsPage    from './pages/Admin/AdminReportsPage';
+import AdminAnalyticsPage  from './pages/Admin/AdminAnalyticsPage';
 import './App.css';
 
 // Auth guard
@@ -30,6 +36,18 @@ const GuestRoute = ({ children }) => {
   return user ? <Navigate to="/" replace /> : children;
 };
 
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
+};
+
 function AppRoutes() {
   return (
     <>
@@ -44,6 +62,16 @@ function AppRoutes() {
           <Route path="/listings/new"     element={<PrivateRoute><CreateListingPage /></PrivateRoute>} />
           <Route path="/dashboard"        element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path="/handover/:id"     element={<PrivateRoute><HandoverPage /></PrivateRoute>} />
+          
+          {/* Protected Admin Routes */}
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="listings" element={<AdminListingsPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+          </Route>
+
           <Route path="*"                 element={<Navigate to="/" replace />} />
         </Routes>
       </main>

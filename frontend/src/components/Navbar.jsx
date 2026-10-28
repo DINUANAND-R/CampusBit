@@ -51,6 +51,16 @@ export default function Navbar() {
                 <LayoutDashboard size={15} />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
+              {user.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  id="nav-admin-link"
+                  className="btn btn-secondary btn-sm border-amber-400/40 text-amber-300 hover:bg-amber-500/10"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span>Admin</span>
+                </Link>
+              )}
               <button onClick={() => { logout(); navigate('/'); }} className="btn btn-secondary btn-sm">
                 <LogOut size={15} />
               </button>

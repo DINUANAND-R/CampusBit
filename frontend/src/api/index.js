@@ -68,4 +68,32 @@ export const handoverApi = {
   confirm: (listingId, code) => api.post(`/handover/${listingId}/confirm`, { code }),
 };
 
+// ── Seller Analytics ──────────────────────────────────────────────────────────
+export const sellerAnalyticsApi = {
+  getOverview: (params) => api.get('/seller/analytics/overview', { params }),
+  getTrends: (params) => api.get('/seller/analytics/trends', { params }),
+  getListings: (params) => api.get('/seller/analytics/listings', { params }),
+  getSingleListing: (id) => api.get(`/seller/analytics/listings/${id}`),
+};
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+export const adminApi = {
+  getOverview: (params) => api.get('/admin/overview', { params }),
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getUser: (id) => api.get(`/admin/users/${id}`),
+  updateUserStatus: (id, data) => api.patch(`/admin/users/${id}/status`, data),
+  updateUserRole: (id, data) => api.patch(`/admin/users/${id}/role`, data),
+  getListings: (params) => api.get('/admin/listings', { params }),
+  moderateListing: (id, data) => api.patch(`/admin/listings/${id}/moderate`, data),
+  getReports: (params) => api.get('/admin/reports', { params }),
+  updateReport: (id, data) => api.patch(`/admin/reports/${id}`, data),
+  getAnalytics: (params) => api.get('/admin/analytics', { params }),
+};
+
+// ── Reports ───────────────────────────────────────────────────────────────────
+export const reportsApi = {
+  create: (data) => api.post('/reports', data),
+  myReports: () => api.get('/reports/my'),
+};
+
 export default api;
