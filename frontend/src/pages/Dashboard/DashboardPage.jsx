@@ -318,15 +318,16 @@ export default function DashboardPage() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-1.5">
-                        {/* Edit schedule or listing */}
-                        {(isScheduled || (isActive && bidCount === 0)) && (
+                        {/* Edit product option */}
+                        {(isScheduled || isActive || l.status === 'draft') && (
                           <Link
                             to={`/listings/${l._id}/edit`}
-                            className="btn btn-secondary btn-sm py-1.5 px-2.5 text-xs flex items-center gap-1"
-                            title={isScheduled ? 'Reschedule publication' : 'Edit listing'}
+                            id={`edit-product-${l._id}`}
+                            className="btn btn-secondary btn-sm py-1.5 px-3 text-xs flex items-center gap-1.5 font-600 text-slate-200 hover:text-white hover:border-brand-400/50"
+                            title={isScheduled ? 'Edit product details & schedule' : (isActive && bidCount > 0 ? 'Edit product details (pricing locked)' : 'Edit product')}
                           >
-                            <Edit3 size={13} />
-                            <span>{isScheduled ? 'Reschedule' : 'Edit'}</span>
+                            <Edit3 size={13} className="text-brand-400" />
+                            <span>Edit</span>
                           </Link>
                         )}
 
@@ -341,16 +342,6 @@ export default function DashboardPage() {
                             <Trash2 size={13} />
                             <span>Cancel</span>
                           </button>
-                        )}
-
-                        {/* Active with bids info indicator */}
-                        {isActive && bidCount > 0 && (
-                          <span
-                            className="text-[11px] text-slate-500 bg-surface-700/60 px-2 py-1 rounded"
-                            title="Auction cannot be cancelled once bidding starts"
-                          >
-                            Locked
-                          </span>
                         )}
 
                         {/* Handover link */}

@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import ImageUpload from '../../components/ImageUpload';
 import VideoUpload from '../../components/VideoUpload';
 import toast from 'react-hot-toast';
-import { Info, Loader, ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { Info, Loader, ArrowLeft, Calendar, Clock, Lock } from 'lucide-react';
 
 const CATEGORIES = ['books', 'electronics', 'clothing', 'furniture', 'sports', 'other'];
 const CONDITIONS  = ['new', 'like-new', 'good', 'fair'];
@@ -32,6 +32,8 @@ export default function EditListingPage() {
   const [existingVideo, setExistingVideo] = useState(null);
   const [newVideoFile, setNewVideoFile] = useState(null);
   const [hadInitialVideo, setHadInitialVideo] = useState(false);
+  const [hasBids, setHasBids] = useState(false);
+  const [bidsCount, setBidsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -74,11 +76,11 @@ export default function EditListingPage() {
           return;
         }
 
-        // Check bid count: cannot edit if bids exist
-        if (bd.bids?.length > 0) {
-          toast.error('Cannot edit an auction that already has active bids.');
-          navigate(`/listings/${id}`);
-          return;
+        // Check bid count: track if bids exist to lock pricing while allowing other edits
+        const bidsLength = bd.bids?.length || 0;
+        if (bidsLength > 0) {
+          setHasBids(true);
+          setBidsCount(bidsLength);
         }
 
         setListingStatus(listing.status);
@@ -164,12 +166,14 @@ export default function EditListingPage() {
       formData.append('description', form.description.trim());
       formData.append('category', form.category);
       formData.append('condition', form.condition);
-      if (form.reservePrice) {
-        formData.append('reservePrice', String(Number(form.reservePrice)));
-      } else {
-        formData.append('reservePrice', '');
+      if (!hasBids) {
+        if (form.reservePrice) {
+          formData.append('reservePrice', String(Number(form.reservePrice)));
+        } else {
+          formData.append('reservePrice', '');
+        }
+        formData.append('minBidIncrement', String(Number(form.minBidIncrement) || 10));
       }
-      formData.append('minBidIncrement', String(Number(form.minBidIncrement) || 10));
 
       if (listingStatus === 'scheduled' && scheduledAt) {
         formData.append('publishAt', new Date(scheduledAt).toISOString());
@@ -238,13 +242,25 @@ export default function EditListingPage() {
       </button>
 
       <div className="mb-8">
-        <h1 className="font-display font-700 text-3xl text-slate-100 mb-2">Edit Listing</h1>
+        <h1 className="font-display font-700 text-3xl text-slate-100 mb-2">Edit Product</h1>
         <p className="text-slate-400">
           {listingStatus === 'scheduled'
-            ? 'Update your scheduled listing details, photos, or change the publication time.'
-            : 'Update item details and manage photos. Modifications are only permitted before bids are placed.'}
+            ? 'Update your scheduled listing details, photos, video, or publication time.'
+            : 'Update your product details, photos, and video.'}
         </p>
       </div>
+
+      {hasBids && (
+        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl p-4 mb-6 text-xs flex items-start gap-2.5">
+          <Lock size={16} className="text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-600 text-amber-200">Active Bidding In Progress ({bidsCount} {bidsCount === 1 ? 'bid' : 'bids'} placed)</p>
+            <p className="text-amber-300/80 mt-0.5">
+              Pricing terms are locked to protect current bidders. You can still update item title, description, category, condition, photos, and product video.
+            </p>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl px-4 py-3 mb-6 text-sm">
@@ -356,29 +372,39 @@ export default function EditListingPage() {
 
           <div className="grid grid-cols-2 gap-4">
             {field('Reserve price (₹)',
-              <input
-                id="edit-listing-reserve"
-                type="number"
-                className="input"
-                min={1}
-                disabled={saving}
-                value={form.reservePrice}
-                onChange={set('reservePrice')}
-                placeholder="Optional"
-              />,
-              "Item won't sell if bids don't reach this"
+              <div className="relative">
+                <input
+                  id="edit-listing-reserve"
+                  type="number"
+                  className={`input ${hasBids ? 'opacity-50 cursor-not-allowed bg-surface-900' : ''}`}
+                  min={1}
+                  disabled={saving || hasBids}
+                  value={form.reservePrice}
+                  onChange={set('reservePrice')}
+                  placeholder={hasBids ? 'Locked' : 'Optional'}
+                />
+                {hasBids && (
+                  <Lock size={14} className="absolute right-3 top-3 text-slate-500" />
+                )}
+              </div>,
+              hasBids ? 'Locked: active bidding in progress' : "Item won't sell if bids don't reach this"
             )}
             {field('Min bid increment (₹)',
-              <input
-                id="edit-listing-increment"
-                type="number"
-                className="input"
-                min={1}
-                disabled={saving}
-                value={form.minBidIncrement}
-                onChange={set('minBidIncrement')}
-              />,
-              'Minimum amount each bid must exceed current price'
+              <div className="relative">
+                <input
+                  id="edit-listing-increment"
+                  type="number"
+                  className={`input ${hasBids ? 'opacity-50 cursor-not-allowed bg-surface-900' : ''}`}
+                  min={1}
+                  disabled={saving || hasBids}
+                  value={form.minBidIncrement}
+                  onChange={set('minBidIncrement')}
+                />
+                {hasBids && (
+                  <Lock size={14} className="absolute right-3 top-3 text-slate-500" />
+                )}
+              </div>,
+              hasBids ? 'Locked: active bidding in progress' : 'Minimum amount each bid must exceed current price'
             )}
           </div>
         </div>

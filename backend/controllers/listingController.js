@@ -285,14 +285,9 @@ exports.updateListing = async (req, res, next) => {
       return res.status(400).json({ message: `Cannot edit a ${listing.status} listing` });
     }
 
-    // Bid check: active auctions with bids cannot be edited
-    if (listing.status === 'active') {
-      const bidCount = await Bid.countDocuments({ listing: listing._id });
-      if (bidCount > 0) {
-        await deleteUploadedFiles(req.files);
-        return res.status(400).json({ message: 'Cannot edit an auction that already has active bids' });
-      }
-    }
+    // Check if active auction has existing bids
+    const bidCount = await Bid.countDocuments({ listing: listing._id });
+    const hasBids = bidCount > 0;
 
     // Rescheduling logic for scheduled listings
     if (req.body.publishAt !== undefined) {
@@ -410,8 +405,11 @@ exports.updateListing = async (req, res, next) => {
       (orig) => !finalImages.some((f) => (f.filename && f.filename === orig.filename) || f.url === orig.url)
     );
 
-    // Update text and pricing fields
-    const allowed = ['title', 'description', 'category', 'condition', 'reservePrice', 'minBidIncrement'];
+    // Update text and pricing fields (pricing locked if bidding is active)
+    const allowed = ['title', 'description', 'category', 'condition'];
+    if (!hasBids) {
+      allowed.push('reservePrice', 'minBidIncrement');
+    }
     allowed.forEach((k) => {
       if (req.body[k] !== undefined) {
         if (k === 'category') listing[k] = req.body[k].toLowerCase().trim();

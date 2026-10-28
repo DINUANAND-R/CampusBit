@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { sellerAnalyticsApi } from '../../api';
 import {
   TrendAreaChart,
@@ -23,6 +24,7 @@ import {
   ChevronRight,
   X,
   ExternalLink,
+  Edit3,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -508,13 +510,24 @@ export default function SellerAnalyticsView() {
                             {item.viewsCount}
                           </td>
                           <td className="py-3 px-3 text-right whitespace-nowrap">
-                            <button
-                              type="button"
-                              onClick={() => openListingDetailModal(item._id)}
-                              className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-brand-300 hover:text-brand-200"
-                            >
-                              Analytics →
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              {(item.status === 'active' || item.status === 'scheduled' || item.status === 'draft') && (
+                                <Link
+                                  to={`/listings/${item._id}/edit`}
+                                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:border-brand-400/40"
+                                  title="Edit product"
+                                >
+                                  <Edit3 size={12} className="text-brand-400" /> Edit
+                                </Link>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => openListingDetailModal(item._id)}
+                                className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-brand-300 hover:text-brand-200"
+                              >
+                                Analytics →
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -560,12 +573,22 @@ export default function SellerAnalyticsView() {
               <h3 className="font-display font-700 text-lg text-slate-100 flex items-center gap-2">
                 <TrendingUp size={18} className="text-brand-400" /> Listing Analytics Details
               </h3>
-              <button
-                onClick={() => setSelectedListingId(null)}
-                className="text-slate-400 hover:text-slate-200"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                {singleListingDetail?.listing && (singleListingDetail.listing.status === 'active' || singleListingDetail.listing.status === 'scheduled' || singleListingDetail.listing.status === 'draft') && (
+                  <Link
+                    to={`/listings/${singleListingDetail.listing._id}/edit`}
+                    className="btn btn-secondary btn-sm py-1 px-2.5 text-xs flex items-center gap-1.5 text-brand-300 hover:text-brand-200"
+                  >
+                    <Edit3 size={13} /> Edit Product
+                  </Link>
+                )}
+                <button
+                  onClick={() => setSelectedListingId(null)}
+                  className="text-slate-400 hover:text-slate-200"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {loadingDetail || !singleListingDetail ? (

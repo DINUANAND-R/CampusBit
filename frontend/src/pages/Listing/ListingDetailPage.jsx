@@ -512,12 +512,13 @@ export default function ListingDetailPage() {
               <h1 className="font-display font-700 text-2xl text-slate-100 leading-snug">{listing.title}</h1>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`badge border ${conditionBadge[listing.condition]}`}>{listing.condition}</span>
-                {isSeller && (isScheduled || (isActive && bids.length === 0)) && (
+                {isSeller && (isScheduled || isActive || listing.status === 'draft') && (
                   <Link
                     to={`/listings/${id}/edit`}
-                    className="btn btn-secondary btn-sm flex items-center gap-1.5 py-1 px-2.5 text-xs"
+                    className="btn btn-secondary btn-sm flex items-center gap-1.5 py-1 px-2.5 text-xs font-600 text-slate-200 hover:text-white hover:border-brand-400/40"
+                    title="Edit product details, photos, or video"
                   >
-                    <Edit3 size={12} /> {isScheduled ? 'Edit Schedule' : 'Edit'}
+                    <Edit3 size={12} className="text-brand-400" /> Edit Product
                   </Link>
                 )}
                 {canSellerCancel && (
@@ -801,7 +802,15 @@ export default function ListingDetailPage() {
             )}
 
             {isSeller && isActive && (
-              <p className="text-slate-500 text-sm italic">You are the seller — you cannot bid on your own listing.</p>
+              <div className="flex flex-col gap-2.5">
+                <p className="text-slate-500 text-xs italic">You are the seller — you cannot bid on your own listing.</p>
+                <Link
+                  to={`/listings/${id}/edit`}
+                  className="btn btn-secondary btn-sm w-full flex items-center justify-center gap-1.5 py-2 text-xs font-600 text-slate-200 hover:text-white"
+                >
+                  <Edit3 size={13} className="text-brand-400" /> Edit Product Details
+                </Link>
+              </div>
             )}
 
             {isScheduled && (
