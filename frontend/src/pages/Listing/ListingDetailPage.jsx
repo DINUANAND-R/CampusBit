@@ -7,7 +7,7 @@ import Countdown from '../../components/Countdown';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Image as ImageIcon
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Calendar, Trash2, X
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -32,6 +32,9 @@ export default function ListingDetailPage() {
   const [bidError, setBidError]   = useState('');
   const [imgIdx, setImgIdx]       = useState(0);
   const [extended, setExtended]   = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
   const bidListRef = useRef(null);
 
   // Load listing + bid history
@@ -42,10 +45,10 @@ export default function ListingDetailPage() {
         bidsApi.history(id),
       ]);
       setListing(ld.listing);
-      setBids(bd.bids);
+      setBids(bd.bids || []);
       setBidAmount(String((ld.listing.currentPrice + ld.listing.minBidIncrement) || ''));
     } catch {
-      toast.error('Listing not found');
+      toast.error('Listing not found or not active');
       navigate('/');
     } finally {
       setLoading(false);
@@ -69,7 +72,6 @@ export default function ListingDetailPage() {
         isLateBid: data.isLateBid,
         createdAt: new Date().toISOString(),
       }, ...prev]);
-      // flash
       bidListRef.current?.firstElementChild?.classList.add('bid-flash');
     };
 
@@ -91,11 +93,33 @@ export default function ListingDetailPage() {
       }
     };
 
+    const onCancelled = (data) => {
+      if (data.listingId !== id) return;
+      setListing((prev) => prev ? {
+        ...prev,
+        status: 'cancelled',
+        cancellationReason: data.reason,
+        cancelledAt: data.cancelledAt,
+      } : prev);
+      toast.error(`This auction was cancelled: ${data.reason || 'by seller'}`);
+    };
+
+    const onStatusChange = (data) => {
+      if (data.listingId !== id) return;
+      setListing((prev) => prev ? {
+        ...prev,
+        status: data.status,
+        endsAt: data.endsAt || prev.endsAt,
+      } : prev);
+    };
+
     const onError = ({ message }) => toast.error(message);
 
     socket.on('auction:bid_update', onBidUpdate);
     socket.on('auction:extended',   onExtended);
     socket.on('auction:closed',     onClosed);
+    socket.on('auction:cancelled',  onCancelled);
+    socket.on('auction:status_change', onStatusChange);
     socket.on('auction:error',      onError);
 
     return () => {
@@ -103,6 +127,8 @@ export default function ListingDetailPage() {
       socket.off('auction:bid_update', onBidUpdate);
       socket.off('auction:extended',   onExtended);
       socket.off('auction:closed',     onClosed);
+      socket.off('auction:cancelled',  onCancelled);
+      socket.off('auction:status_change', onStatusChange);
       socket.off('auction:error',      onError);
     };
   }, [socket, id]);
@@ -129,6 +155,21 @@ export default function ListingDetailPage() {
     }
   };
 
+  const handleConfirmCancel = async () => {
+    setCancelling(true);
+    try {
+      const { data } = await listingsApi.cancel(id, cancelReason);
+      toast.success('Listing cancelled successfully');
+      setListing(data.listing);
+      setShowCancelModal(false);
+      setCancelReason('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel listing');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8 animate-pulse">
@@ -141,9 +182,12 @@ export default function ListingDetailPage() {
   if (!listing) return null;
 
   const isActive = listing.status === 'active';
+  const isScheduled = listing.status === 'scheduled';
+  const isCancelled = listing.status === 'cancelled';
   const isSeller = user?._id === listing.seller?._id;
   const minBid   = listing.currentPrice + listing.minBidIncrement;
   const images   = listing.images?.length ? listing.images : [];
+  const canSellerCancel = isSeller && (isScheduled || (isActive && bids.length === 0));
 
   const categoryEmoji = { books:'📚',electronics:'💻',clothing:'👕',furniture:'🛋️',sports:'⚽',other:'📦' };
 
@@ -156,7 +200,43 @@ export default function ListingDetailPage() {
         </div>
       )}
 
-      {/* Status banner */}
+      {/* Scheduled banner */}
+      {isScheduled && (
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-brand-500/10 border border-brand-500/30 text-brand-300 rounded-xl p-4 text-sm">
+          <div className="flex items-center gap-3">
+            <Calendar size={20} className="text-brand-400 shrink-0" />
+            <div>
+              <p className="font-700 text-slate-100">Scheduled Auction (Unpublished Preview)</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Goes live on {new Date(listing.publishAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+              </p>
+            </div>
+          </div>
+          <span className="badge bg-brand-500/20 text-brand-300 self-start sm:self-auto border border-brand-400/30">
+            Visible only to seller
+          </span>
+        </div>
+      )}
+
+      {/* Cancelled banner */}
+      {isCancelled && (
+        <div className="mb-6 flex items-start gap-3 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-xl p-4 text-sm">
+          <XCircle size={20} className="text-rose-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-700 text-rose-200">This auction has been cancelled by the seller</p>
+            {listing.cancellationReason && (
+              <p className="text-xs text-rose-300/80 mt-0.5">Reason: {listing.cancellationReason}</p>
+            )}
+            {listing.cancelledAt && (
+              <p className="text-[11px] text-slate-500 mt-1">
+                Cancelled on {new Date(listing.cancelledAt).toLocaleString()}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Status banners */}
       {listing.status === 'unsold' && (
         <div className="mb-6 flex items-center gap-3 bg-slate-500/10 border border-slate-500/30 text-slate-400 rounded-xl px-4 py-3 text-sm font-600">
           <Package size={18} /> This auction ended unsold — no bids met the requirements.
@@ -232,13 +312,21 @@ export default function ListingDetailPage() {
               <h1 className="font-display font-700 text-2xl text-slate-100 leading-snug">{listing.title}</h1>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`badge border ${conditionBadge[listing.condition]}`}>{listing.condition}</span>
-                {isSeller && isActive && bids.length === 0 && (
+                {isSeller && (isScheduled || (isActive && bids.length === 0)) && (
                   <Link
                     to={`/listings/${id}/edit`}
                     className="btn btn-secondary btn-sm flex items-center gap-1.5 py-1 px-2.5 text-xs"
                   >
-                    <Edit3 size={12} /> Edit
+                    <Edit3 size={12} /> {isScheduled ? 'Edit Schedule' : 'Edit'}
                   </Link>
+                )}
+                {canSellerCancel && (
+                  <button
+                    onClick={() => setShowCancelModal(true)}
+                    className="btn btn-danger btn-sm flex items-center gap-1.5 py-1 px-2.5 text-xs"
+                  >
+                    <Trash2 size={12} /> Cancel
+                  </button>
                 )}
               </div>
             </div>
@@ -255,7 +343,9 @@ export default function ListingDetailPage() {
         <div className="flex flex-col gap-4">
           {/* Price + timer */}
           <div className="glass rounded-2xl p-6">
-            <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Current price</p>
+            <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">
+              {isScheduled ? 'Starting price' : 'Current price'}
+            </p>
             <p className="font-display font-800 text-4xl gradient-text mb-1">
               ₹{listing.currentPrice?.toLocaleString()}
             </p>
@@ -272,7 +362,16 @@ export default function ListingDetailPage() {
               </div>
             )}
 
-            {/* Bid input */}
+            {isScheduled && (
+              <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-3 mb-4 text-xs text-brand-300 flex items-center gap-2">
+                <Clock size={15} />
+                <span>
+                  Goes live in: <strong><Countdown endsAt={listing.publishAt} /></strong>
+                </span>
+              </div>
+            )}
+
+            {/* Bid input (only when active and not seller) */}
             {isActive && !isSeller && (
               <div className="flex flex-col gap-3">
                 <div>
@@ -321,6 +420,18 @@ export default function ListingDetailPage() {
               <p className="text-slate-500 text-sm italic">You are the seller — you cannot bid on your own listing.</p>
             )}
 
+            {isScheduled && (
+              <p className="text-slate-400 text-sm italic bg-surface-700/50 p-3 rounded-xl">
+                Bidding is disabled while this listing is scheduled. It will open automatically when published.
+              </p>
+            )}
+
+            {isCancelled && (
+              <p className="text-rose-400/80 text-sm italic bg-surface-700/50 p-3 rounded-xl">
+                This auction is cancelled. No further bids can be accepted.
+              </p>
+            )}
+
             {/* Handover link for closed auctions */}
             {(listing.status === 'closed' || listing.status === 'completed') && (
               <Link to={`/handover/${id}`} id="handover-link"
@@ -341,7 +452,7 @@ export default function ListingDetailPage() {
 
             <div className="flex flex-col gap-2 max-h-64 overflow-y-auto" ref={bidListRef}>
               {bids.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-4">No bids yet — be the first!</p>
+                <p className="text-slate-500 text-sm text-center py-4">No bids yet</p>
               ) : (
                 bids.map((bid, i) => (
                   <div key={bid._id} className={`flex items-center justify-between p-2.5 rounded-xl ${i === 0 ? 'bg-brand-500/10 border border-brand-500/20' : 'bg-white/2'}`}>
@@ -368,6 +479,65 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog for Cancellation */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass rounded-2xl max-w-md w-full p-6 border border-white/10 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-700 text-lg text-slate-100 flex items-center gap-2 text-rose-400">
+                <AlertTriangle size={18} /> Cancel Listing
+              </h3>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="text-slate-400 hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-slate-300 text-sm">
+              Are you sure you want to cancel <strong className="text-slate-100">"{listing.title}"</strong>?
+            </p>
+
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs p-3 rounded-xl leading-relaxed">
+              ⚠️ <strong>Warning:</strong> This action cannot be undone. Once cancelled, the listing will be permanently removed from public auction and will not accept any bids.
+            </div>
+
+            <div>
+              <label className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">
+                Reason for cancellation (optional)
+              </label>
+              <input
+                className="input text-sm"
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="e.g. Item damaged, wrong price, no longer available"
+                maxLength={200}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                className="btn btn-secondary flex-1"
+                disabled={cancelling}
+              >
+                Keep Listing
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                disabled={cancelling}
+                className="btn btn-danger flex-1 flex items-center justify-center gap-1.5"
+              >
+                {cancelling ? 'Cancelling…' : 'Yes, Cancel Listing'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

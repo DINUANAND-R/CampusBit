@@ -18,47 +18,61 @@ const startAuctionCloser = (io) => {
       });
 
       for (const listing of expiredListings) {
-        const hadBids = Boolean(listing.winner || listing.leadingBid);
-        const reserveMet =
-          !listing.reservePrice || listing.currentPrice >= listing.reservePrice;
+        try {
+          const hadBids = Boolean(listing.winner || listing.leadingBid);
+          const reserveMet =
+            !listing.reservePrice || listing.currentPrice >= listing.reservePrice;
 
-        if (hadBids && reserveMet && listing.winner) {
-          listing.status = 'closed';
-          await listing.save();
+          if (hadBids && reserveMet && listing.winner) {
+            const updated = await Listing.findOneAndUpdate(
+              { _id: listing._id, status: 'active' },
+              { status: 'closed' },
+              { returnDocument: 'after' }
+            );
 
-          // Create handover record
-          const existing = await Handover.findOne({ listing: listing._id });
-          if (!existing) {
-            await Handover.create({
-              listing: listing._id,
-              seller: listing.seller,
-              buyer: listing.winner,
-              finalPrice: listing.currentPrice,
-            });
+            if (!updated) continue; // Already processed concurrently
+
+            // Create handover record
+            const existing = await Handover.findOne({ listing: listing._id });
+            if (!existing) {
+              await Handover.create({
+                listing: listing._id,
+                seller: listing.seller,
+                buyer: listing.winner,
+                finalPrice: listing.currentPrice,
+              });
+            }
+
+            // Notify clients in room
+            if (io) {
+              io.to(`auction:${listing._id}`).emit('auction:closed', {
+                listingId: listing._id,
+                winner: listing.winner,
+                finalPrice: listing.currentPrice,
+              });
+            }
+            console.log(`🔨 Auction closed: ${listing.title} → winner ${listing.winner}`);
+          } else {
+            const updated = await Listing.findOneAndUpdate(
+              { _id: listing._id, status: 'active' },
+              { status: 'unsold' },
+              { returnDocument: 'after' }
+            );
+
+            if (!updated) continue;
+
+            if (io) {
+              io.to(`auction:${listing._id}`).emit('auction:closed', {
+                listingId: listing._id,
+                winner: null,
+                finalPrice: null,
+                reason: listing.reservePrice && !reserveMet ? 'Reserve not met' : 'No bids',
+              });
+            }
+            console.log(`📦 Auction unsold: ${listing.title}`);
           }
-
-          // Notify clients in room
-          if (io) {
-            io.to(`auction:${listing._id}`).emit('auction:closed', {
-              listingId: listing._id,
-              winner: listing.winner,
-              finalPrice: listing.currentPrice,
-            });
-          }
-          console.log(`🔨 Auction closed: ${listing.title} → winner ${listing.winner}`);
-        } else {
-          listing.status = 'unsold';
-          await listing.save();
-
-          if (io) {
-            io.to(`auction:${listing._id}`).emit('auction:closed', {
-              listingId: listing._id,
-              winner: null,
-              finalPrice: null,
-              reason: listing.reservePrice && !reserveMet ? 'Reserve not met' : 'No bids',
-            });
-          }
-          console.log(`📦 Auction unsold: ${listing.title}`);
+        } catch (itemErr) {
+          console.error(`Error closing listing ${listing._id}:`, itemErr.message);
         }
       }
     } catch (err) {

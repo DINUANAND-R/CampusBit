@@ -32,6 +32,7 @@ const listingSchema = new mongoose.Schema(
       validate: {
         validator: function (val) {
           if (this.status === 'draft') return true;
+          if (!this.isModified('images') && !this.isNew) return true;
           return Array.isArray(val) && val.length >= 1 && val.length <= 5;
         },
         message: 'A listing must have between 1 and 5 images',
@@ -46,9 +47,13 @@ const listingSchema = new mongoose.Schema(
     winner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     status: {
       type: String,
-      enum: ['draft', 'active', 'closed', 'unsold', 'completed'],
+      enum: ['draft', 'scheduled', 'active', 'closed', 'unsold', 'completed', 'cancelled'],
       default: 'active',
     },
+    publishAt: { type: Date, default: null },
+    publishedAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
+    cancellationReason: { type: String, trim: true, default: '' },
     startAt: { type: Date, default: Date.now },
     endsAt: { type: Date, required: true },
     extensionCount: { type: Number, default: 0 },
@@ -62,9 +67,14 @@ listingSchema.pre('save', function () {
   if (this.isNew && (this.currentPrice === undefined || this.currentPrice === null)) {
     this.currentPrice = this.startingPrice;
   }
+  // If active and publishedAt not set, default publishedAt to now
+  if (this.status === 'active' && !this.publishedAt) {
+    this.publishedAt = this.publishedAt || new Date();
+  }
 });
 
 // Indexes
+listingSchema.index({ status: 1, publishAt: 1 });
 listingSchema.index({ status: 1, endsAt: 1 });
 listingSchema.index({ seller: 1 });
 listingSchema.index({ title: 'text', description: 'text' });

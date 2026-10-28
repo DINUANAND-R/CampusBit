@@ -19,6 +19,9 @@ const placeBid = async (listingId, bidderId, amount) => {
     if (listing.status !== 'active') {
       const err = new Error('Auction is not active'); err.status = 400; throw err;
     }
+    if (listing.publishAt && new Date() < listing.publishAt) {
+      const err = new Error('Auction is scheduled and has not opened for bidding yet'); err.status = 400; throw err;
+    }
     if (new Date() > listing.endsAt) {
       const err = new Error('Auction has ended'); err.status = 400; throw err;
     }

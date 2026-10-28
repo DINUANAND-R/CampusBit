@@ -12,6 +12,7 @@ const bidRoutes = require('./routes/bids');
 const handoverRoutes = require('./routes/handover');
 const { registerSocketHandlers } = require('./socket/auctionSocket');
 const { startAuctionCloser } = require('./jobs/auctionCloser');
+const { startScheduledPublisher } = require('./jobs/scheduledPublisher');
 
 // ── Connect to MongoDB ────────────────────────────────────────────────────────
 connectDB();
@@ -37,6 +38,7 @@ const io = new Server(server, {
 });
 registerSocketHandlers(io);
 startAuctionCloser(io);
+startScheduledPublisher(io);
 app.set('io', io);
 
 // ── Express middleware ────────────────────────────────────────────────────────

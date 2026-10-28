@@ -43,14 +43,14 @@ export const authApi = {
   me: () => api.get('/auth/me'),
 };
 
-// ── Listings ──────────────────────────────────────────────────────────────────
 export const listingsApi = {
   getAll: (params) => api.get('/listings', { params }),
   getOne: (id) => api.get(`/listings/${id}`),
   create: (data) => api.post('/listings', data),
   update: (id, data) => api.patch(`/listings/${id}`, data),
+  cancel: (id, reason) => api.patch(`/listings/${id}/cancel`, { reason }),
   delete: (id) => api.delete(`/listings/${id}`),
-  myListings: () => api.get('/listings/my'),
+  myListings: (params) => api.get('/listings/my', { params }),
 };
 
 // ── Bids ──────────────────────────────────────────────────────────────────────
