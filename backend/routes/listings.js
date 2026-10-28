@@ -12,6 +12,7 @@ router.get('/:id', optionalAuth, ctrl.getListing);
 router.post('/', protect, uploadListingImages, ctrl.createListing);
 router.patch('/:id/cancel', protect, ctrl.cancelListing);
 router.patch('/:id', protect, uploadListingImages, ctrl.updateListing);
+router.put('/:id', protect, uploadListingImages, ctrl.updateListing);
 router.delete('/:id', protect, ctrl.deleteListing);
 
 // Auction Discussion endpoints

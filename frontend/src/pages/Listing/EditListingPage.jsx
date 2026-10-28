@@ -49,6 +49,21 @@ export default function EditListingPage() {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
+  const setMinutePublishPreset = (mins) => {
+    const d = new Date(Date.now() + mins * 60 * 1000);
+    const formatted = formatDatetimeLocal(d);
+    setScheduledAt(formatted);
+    if (!endsAt || new Date(endsAt) <= d) {
+      setEndsAt(formatDatetimeLocal(new Date(d.getTime() + 10 * 60 * 1000)));
+    }
+  };
+
+  const setMinuteDurationPreset = (mins) => {
+    const base = scheduledAt ? new Date(scheduledAt) : new Date();
+    const end = new Date(base.getTime() + mins * 60 * 1000);
+    setEndsAt(formatDatetimeLocal(end));
+  };
+
   // Load listing
   useEffect(() => {
     let isMounted = true;
@@ -332,36 +347,77 @@ export default function EditListingPage() {
           <div className="bg-[#1B201B] rounded-2xl p-6 flex flex-col gap-4 border border-[#C6FF4D]/30 shadow-lg">
             <div className="flex items-center gap-2 text-[#C6FF4D]">
               <Calendar size={18} />
-              <h2 className="font-600 text-[#F4F5F0] text-lg">Scheduled publication time</h2>
+              <h2 className="font-600 text-[#F4F5F0] text-lg">Scheduled publication & auction timing</h2>
             </div>
             <p className="text-[#A1A79E] text-xs">
-              This auction is scheduled to go live automatically. You can choose a new future date and time.
+              This auction is scheduled to go live automatically. You can reschedule when it starts and how many minutes/hours it will run.
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              {field('Publication Date & Time',
-                <input
-                  id="edit-listing-publish-at"
-                  type="datetime-local"
-                  className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
-                  required
-                  disabled={saving}
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                />,
-                'When the auction will go live'
-              )}
-              {field('Auction Closing Date & Time',
-                <input
-                  id="edit-listing-ends-at"
-                  type="datetime-local"
-                  className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
-                  disabled={saving}
-                  value={endsAt}
-                  min={scheduledAt}
-                  onChange={(e) => setEndsAt(e.target.value)}
-                />,
-                'Must be strictly after publication time'
-              )}
+              <div>
+                {field('Publication Date & Time',
+                  <input
+                    id="edit-listing-publish-at"
+                    type="datetime-local"
+                    className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
+                    required
+                    disabled={saving}
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                  />,
+                  'When the auction will go live'
+                )}
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                  <span className="text-[10px] text-[#747D72] uppercase tracking-wider font-600">Go live:</span>
+                  {[2, 5, 15, 30].map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMinutePublishPreset(m)}
+                      className="btn btn-secondary btn-sm py-0.5 px-2 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                    >
+                      ⚡ +{m}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                {field('Auction Closing Date & Time',
+                  <input
+                    id="edit-listing-ends-at"
+                    type="datetime-local"
+                    className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D]"
+                    disabled={saving}
+                    value={endsAt}
+                    min={scheduledAt}
+                    onChange={(e) => setEndsAt(e.target.value)}
+                  />,
+                  'Must be strictly after publication time'
+                )}
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                  <span className="text-[10px] text-[#747D72] uppercase tracking-wider font-600">Run for:</span>
+                  {[2, 5, 10, 15, 30].map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMinuteDurationPreset(m)}
+                      className="btn btn-secondary btn-sm py-0.5 px-2 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                    >
+                      ⚡ {m}m
+                    </button>
+                  ))}
+                  {[1, 24].map((h) => (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => setMinuteDurationPreset(h * 60)}
+                      className="btn btn-secondary btn-sm py-0.5 px-2 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
+                    >
+                      {h}h
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

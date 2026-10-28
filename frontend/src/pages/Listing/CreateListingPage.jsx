@@ -8,13 +8,20 @@ import { Info, Loader, Calendar, Clock, Zap } from 'lucide-react';
 
 const CATEGORIES = ['books', 'electronics', 'clothing', 'furniture', 'sports', 'other'];
 const CONDITIONS  = ['new', 'like-new', 'good', 'fair'];
-const DURATIONS   = [
-  { label: '1 hour',   value: 1 },
-  { label: '6 hours',  value: 6 },
-  { label: '12 hours', value: 12 },
-  { label: '1 day',    value: 24 },
-  { label: '3 days',   value: 72 },
-  { label: '7 days',   value: 168 },
+const DURATIONS = [
+  // Fast & Flash sales in minutes
+  { label: '⚡ 2 minutes (Quick test / flash auction)', value: 2 / 60, minutes: 2 },
+  { label: '⚡ 5 minutes (Flash auction)', value: 5 / 60, minutes: 5 },
+  { label: '⚡ 10 minutes (Quick campus deal)', value: 10 / 60, minutes: 10 },
+  { label: '⚡ 15 minutes', value: 15 / 60, minutes: 15 },
+  { label: '⚡ 30 minutes', value: 30 / 60, minutes: 30 },
+  // Standard hours & days
+  { label: '1 hour', value: 1, minutes: 60 },
+  { label: '6 hours', value: 6, minutes: 360 },
+  { label: '12 hours', value: 12, minutes: 720 },
+  { label: '1 day (24 hours)', value: 24, minutes: 1440 },
+  { label: '3 days', value: 72, minutes: 4320 },
+  { label: '7 days', value: 168, minutes: 10080 },
 ];
 
 export default function CreateListingPage() {
@@ -28,6 +35,7 @@ export default function CreateListingPage() {
     reservePrice: '',
     minBidIncrement: '10',
     durationHours: 24,
+    customMinutes: '',
     customEndsAt: '',
   });
 
@@ -39,6 +47,14 @@ export default function CreateListingPage() {
   const [error, setError] = useState('');
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Helper to set preset time in minutes from now
+  const setMinutePreset = (mins) => {
+    const d = new Date(Date.now() + mins * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    setScheduledAt(formatted);
+  };
 
   // Helper to set preset time for tomorrow
   const setTomorrowPreset = (hour) => {
@@ -63,6 +79,7 @@ export default function CreateListingPage() {
     }
 
     let end;
+    let durationLabel = '';
     if (form.durationHours === 'custom') {
       if (!form.customEndsAt) return {
         startText: publishType === 'now' ? 'Immediately upon creation' : start.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
@@ -70,9 +87,20 @@ export default function CreateListingPage() {
         valid: false,
       };
       end = new Date(form.customEndsAt);
+    } else if (form.durationHours === 'customMinutes') {
+      const mins = Math.max(1, Number(form.customMinutes) || 5);
+      end = new Date(start.getTime() + mins * 60 * 1000);
+      durationLabel = ` (${mins} min${mins === 1 ? '' : 's'})`;
     } else {
-      const hours = typeof form.durationHours === 'number' ? form.durationHours : 24;
-      end = new Date(start.getTime() + hours * 60 * 60 * 1000);
+      const match = DURATIONS.find((d) => d.value === form.durationHours);
+      if (match && match.minutes && match.minutes < 60) {
+        end = new Date(start.getTime() + match.minutes * 60 * 1000);
+        durationLabel = ` (${match.minutes} mins)`;
+      } else {
+        const hours = typeof form.durationHours === 'number' ? form.durationHours : 24;
+        end = new Date(start.getTime() + hours * 60 * 60 * 1000);
+        durationLabel = hours < 1 ? ` (${Math.round(hours * 60)} mins)` : ` (${hours} hr${hours === 1 ? '' : 's'})`;
+      }
     }
 
     const isStartValid = publishType === 'now' ? true : start > new Date();
@@ -80,7 +108,7 @@ export default function CreateListingPage() {
 
     return {
       startText: publishType === 'now' ? 'Immediately upon creation' : start.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
-      endText: isNaN(end.getTime()) ? 'Invalid date' : end.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+      endText: isNaN(end.getTime()) ? 'Invalid date' : `${end.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' })}${durationLabel}`,
       valid: isStartValid && isEndValid,
       startValid: isStartValid,
       endValid: isEndValid,
@@ -147,6 +175,12 @@ export default function CreateListingPage() {
         setError('Auction closing time must be strictly after the scheduled publication time.');
         return;
       }
+    } else if (form.durationHours === 'customMinutes') {
+      const mins = Number(form.customMinutes);
+      if (!mins || mins < 1) {
+        setError('Please enter a valid auction duration of at least 1 minute.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -167,8 +201,20 @@ export default function CreateListingPage() {
 
       if (form.durationHours === 'custom') {
         formData.append('endsAt', new Date(form.customEndsAt).toISOString());
+      } else if (form.durationHours === 'customMinutes') {
+        const mins = Math.max(1, Number(form.customMinutes) || 5);
+        formData.append('durationMinutes', String(mins));
+        formData.append('endsAt', new Date(startTime.getTime() + mins * 60 * 1000).toISOString());
       } else {
-        formData.append('durationHours', String(form.durationHours));
+        const match = DURATIONS.find((d) => d.value === form.durationHours);
+        if (match && match.minutes && match.minutes < 60) {
+          formData.append('durationMinutes', String(match.minutes));
+          formData.append('endsAt', new Date(startTime.getTime() + match.minutes * 60 * 1000).toISOString());
+        } else {
+          formData.append('durationHours', String(form.durationHours));
+          const hours = Number(form.durationHours) || 24;
+          formData.append('endsAt', new Date(startTime.getTime() + hours * 60 * 60 * 1000).toISOString());
+        }
       }
 
       if (publishType === 'later') {
@@ -341,18 +387,71 @@ export default function CreateListingPage() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    durationHours: e.target.value === 'custom' ? 'custom' : Number(e.target.value),
+                    durationHours: e.target.value === 'custom' || e.target.value === 'customMinutes'
+                      ? e.target.value
+                      : Number(e.target.value),
                   }))
                 }
               >
-                {DURATIONS.map((d) => (
-                  <option key={d.value} value={d.value}>{d.label}</option>
-                ))}
-                <option value="custom">Custom auction end time…</option>
+                <optgroup label="⚡ Quick Minute Auctions (Flash Sales)">
+                  {DURATIONS.filter((d) => d.minutes < 60).map((d) => (
+                    <option key={d.value} value={d.value}>{d.label}</option>
+                  ))}
+                  <option value="customMinutes">⏱️ Custom duration in minutes…</option>
+                </optgroup>
+                <optgroup label="Standard Hours & Days">
+                  {DURATIONS.filter((d) => d.minutes >= 60).map((d) => (
+                    <option key={d.value} value={d.value}>{d.label}</option>
+                  ))}
+                  <option value="custom">📅 Custom end date & time…</option>
+                </optgroup>
               </select>,
               'Time the auction will stay open for bidding once live'
             )}
           </div>
+
+          {form.durationHours === 'customMinutes' && (
+            <div className="pt-2 animate-fade-in flex flex-col gap-2">
+              <label className="text-xs font-600 text-[#A1A79E] uppercase tracking-wider block">
+                ⚡ Flash Auction Duration in Minutes (1 – 1440 mins)
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1 max-w-[200px]">
+                  <input
+                    id="listing-custom-minutes-input"
+                    type="number"
+                    min="1"
+                    max="1440"
+                    placeholder="e.g. 3"
+                    value={form.customMinutes}
+                    onChange={set('customMinutes')}
+                    className="input bg-[#151815] border-[#30372F] text-[#F4F5F0] focus:border-[#C6FF4D] tabular-nums pr-12"
+                    required
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#747D72]">mins</span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[1, 2, 3, 5, 10, 15, 20, 30, 45].map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, customMinutes: String(m) }))}
+                      className={`btn btn-secondary btn-sm py-1 px-2.5 text-xs transition-all ${
+                        String(form.customMinutes) === String(m)
+                          ? 'border-[#C6FF4D] text-[#C6FF4D] bg-[#C6FF4D]/10 font-600'
+                          : 'text-[#A1A79E] hover:text-[#F4F5F0]'
+                      }`}
+                    >
+                      {m}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[#747D72] text-xs">
+                The auction will stay open for exactly this many minutes from start to finish.
+              </p>
+            </div>
+          )}
 
           {form.durationHours === 'custom' && (
             <div className="pt-2 animate-fade-in">
@@ -432,21 +531,49 @@ export default function CreateListingPage() {
               />
 
               {/* Quick presets */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[#747D72]">Quick presets:</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-[#747D72]">Go live presets:</span>
+                <button
+                  type="button"
+                  onClick={() => setMinutePreset(2)}
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                >
+                  ⚡ In 2 mins
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinutePreset(5)}
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                >
+                  ⚡ In 5 mins
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinutePreset(15)}
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                >
+                  ⚡ In 15 mins
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinutePreset(30)}
+                  className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#C6FF4D] hover:bg-[#C6FF4D]/10 border-[#C6FF4D]/30"
+                >
+                  ⚡ In 30 mins
+                </button>
                 <button
                   type="button"
                   onClick={() => setTomorrowPreset(9)}
                   className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                 >
-                  Tomorrow 9:00 AM
+                  Tomorrow 9 AM
                 </button>
                 <button
                   type="button"
                   onClick={() => setTomorrowPreset(18)}
                   className="btn btn-secondary btn-sm py-1 px-2.5 text-xs text-[#A1A79E] hover:text-[#F4F5F0]"
                 >
-                  Tomorrow 6:00 PM
+                  Tomorrow 6 PM
                 </button>
               </div>
             </div>

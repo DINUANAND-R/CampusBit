@@ -166,7 +166,12 @@ exports.createListing = async (req, res, next) => {
     }
 
     const now = new Date();
-    const duration = Number(durationHours) || 24;
+    let durationMs = 24 * 60 * 60 * 1000;
+    if (req.body.durationMinutes) {
+      durationMs = Number(req.body.durationMinutes) * 60 * 1000;
+    } else if (durationHours) {
+      durationMs = Number(durationHours) * 60 * 60 * 1000;
+    }
 
     let status = 'active';
     let targetPublishAt = null;
@@ -200,7 +205,7 @@ exports.createListing = async (req, res, next) => {
       if (req.body.endsAt) {
         endsAt = new Date(req.body.endsAt);
       } else {
-        endsAt = new Date(scheduledDate.getTime() + duration * 60 * 60 * 1000);
+        endsAt = new Date(scheduledDate.getTime() + durationMs);
       }
 
       if (endsAt <= scheduledDate) {
@@ -214,7 +219,7 @@ exports.createListing = async (req, res, next) => {
       if (req.body.endsAt) {
         endsAt = new Date(req.body.endsAt);
       } else {
-        endsAt = new Date(now.getTime() + duration * 60 * 60 * 1000);
+        endsAt = new Date(now.getTime() + durationMs);
       }
 
       if (endsAt <= now) {
@@ -290,43 +295,47 @@ exports.updateListing = async (req, res, next) => {
     const hasBids = bidCount > 0;
 
     // Rescheduling logic for scheduled listings
-    if (req.body.publishAt !== undefined) {
-      if (listing.status !== 'scheduled') {
-        await deleteUploadedFiles(req.files);
-        return res.status(400).json({ message: 'Only scheduled listings can have their publication time modified' });
-      }
+    if (listing.status === 'scheduled') {
+      let baseStart = listing.publishAt || listing.startAt;
 
-      const newPublishDate = new Date(req.body.publishAt);
-      if (isNaN(newPublishDate.getTime())) {
-        await deleteUploadedFiles(req.files);
-        return res.status(400).json({ message: 'Invalid publication date format' });
-      }
-      if (newPublishDate <= new Date()) {
-        await deleteUploadedFiles(req.files);
-        return res.status(400).json({ message: 'Rescheduled publication time must be in the future' });
-      }
-
-      listing.publishAt = newPublishDate;
-      listing.startAt = newPublishDate;
-
-      // Update endsAt if provided or maintain duration
-      if (req.body.endsAt) {
-        const newEndsAt = new Date(req.body.endsAt);
-        if (newEndsAt <= newPublishDate) {
+      if (req.body.publishAt !== undefined) {
+        const newPublishDate = new Date(req.body.publishAt);
+        if (isNaN(newPublishDate.getTime())) {
           await deleteUploadedFiles(req.files);
-          return res.status(400).json({ message: 'Auction closing time must be after the publication time' });
+          return res.status(400).json({ message: 'Invalid publication date format' });
+        }
+        if (newPublishDate <= new Date()) {
+          await deleteUploadedFiles(req.files);
+          return res.status(400).json({ message: 'Rescheduled publication time must be in the future' });
+        }
+        listing.publishAt = newPublishDate;
+        listing.startAt = newPublishDate;
+        baseStart = newPublishDate;
+      }
+
+      if (req.body.endsAt !== undefined) {
+        const newEndsAt = new Date(req.body.endsAt);
+        if (isNaN(newEndsAt.getTime()) || newEndsAt <= baseStart) {
+          await deleteUploadedFiles(req.files);
+          return res.status(400).json({ message: 'Auction closing time must be strictly after the publication time' });
         }
         listing.endsAt = newEndsAt;
-      } else if (req.body.durationHours) {
+      } else if (req.body.durationMinutes !== undefined) {
+        const durationMins = Number(req.body.durationMinutes);
+        listing.endsAt = new Date(new Date(baseStart).getTime() + durationMins * 60 * 1000);
+      } else if (req.body.durationHours !== undefined) {
         const duration = Number(req.body.durationHours);
-        listing.endsAt = new Date(newPublishDate.getTime() + duration * 60 * 60 * 1000);
-      } else {
-        // Automatically maintain the previous auction duration
-        const oldStart = listing.startAt ? new Date(listing.startAt).getTime() : newPublishDate.getTime();
+        listing.endsAt = new Date(new Date(baseStart).getTime() + duration * 60 * 60 * 1000);
+      } else if (req.body.publishAt !== undefined) {
+        // Automatically maintain the previous auction duration when only publishAt moved
+        const oldStart = listing.startAt ? new Date(listing.startAt).getTime() : new Date(baseStart).getTime();
         const oldEnd = listing.endsAt ? new Date(listing.endsAt).getTime() : oldStart + 24 * 3600 * 1000;
-        const durationMs = Math.max(oldEnd - oldStart, 3600 * 1000); // at least 1 hour
-        listing.endsAt = new Date(newPublishDate.getTime() + durationMs);
+        const durationMs = Math.max(oldEnd - oldStart, 60 * 1000); // at least 1 minute
+        listing.endsAt = new Date(new Date(baseStart).getTime() + durationMs);
       }
+    } else if (req.body.publishAt !== undefined) {
+      await deleteUploadedFiles(req.files);
+      return res.status(400).json({ message: 'Only scheduled listings can have their publication time modified' });
     }
 
     // Process retained existing images
