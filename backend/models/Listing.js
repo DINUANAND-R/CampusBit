@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+const imageSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    filename: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const listingSchema = new mongoose.Schema(
   {
     seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -15,7 +23,21 @@ const listingSchema = new mongoose.Schema(
       required: true,
       enum: ['new', 'like-new', 'good', 'fair'],
     },
-    images: [{ type: String }], // URLs
+    images: {
+      type: [imageSchema],
+      set: (val) =>
+        Array.isArray(val)
+          ? val.map((x) => (typeof x === 'string' ? { url: x, filename: '' } : x))
+          : val,
+      validate: {
+        validator: function (val) {
+          if (this.status === 'draft') return true;
+          return Array.isArray(val) && val.length >= 1 && val.length <= 5;
+        },
+        message: 'A listing must have between 1 and 5 images',
+      },
+      default: [],
+    },
     startingPrice: { type: Number, required: true, min: 1 },
     reservePrice: { type: Number, default: null }, // null = no reserve
     minBidIncrement: { type: Number, default: 10, min: 1 },

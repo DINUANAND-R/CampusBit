@@ -7,8 +7,9 @@ import Countdown from '../../components/Countdown';
 import toast from 'react-hot-toast';
 import {
   Gavel, TrendingUp, User, Clock, ChevronRight,
-  Zap, AlertTriangle, CheckCircle, XCircle, Package
+  Zap, AlertTriangle, CheckCircle, XCircle, Package, Edit3, Image as ImageIcon
 } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const conditionBadge = {
   new:        'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
@@ -173,33 +174,73 @@ export default function ListingDetailPage() {
       )}
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Left — image + details */}
+        {/* Left — image gallery + details */}
         <div className="flex flex-col gap-4">
-          {/* Image viewer */}
-          <div className="glass rounded-2xl overflow-hidden h-72 sm:h-96 flex items-center justify-center relative">
+          {/* Main Image viewer */}
+          <div className="glass rounded-2xl overflow-hidden h-72 sm:h-96 flex items-center justify-center relative bg-surface-800">
             {images.length > 0 ? (
-              <>
-                <img src={images[imgIdx]} alt={listing.title}
-                  className="w-full h-full object-contain" />
-                {images.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {images.map((_, i) => (
-                      <button key={i} onClick={() => setImgIdx(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${i === imgIdx ? 'bg-brand-400 w-5' : 'bg-white/30'}`} />
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <span className="text-7xl">{categoryEmoji[listing.category] || '📦'}</span>
-            )}
+              <img
+                src={getImageUrl(images[imgIdx])}
+                alt={listing.title}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.parentElement.querySelector('.detail-fallback');
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div
+              className={`detail-fallback w-full h-full items-center justify-center text-7xl ${
+                images.length > 0 ? 'hidden' : 'flex'
+              }`}
+            >
+              {categoryEmoji[listing.category] || '📦'}
+            </div>
           </div>
+
+          {/* Thumbnails row */}
+          {images.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {images.map((img, i) => {
+                const src = getImageUrl(img);
+                const isSelected = i === imgIdx;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setImgIdx(i)}
+                    className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                      isSelected
+                        ? 'border-brand-400 ring-2 ring-brand-400/30'
+                        : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={src}
+                      alt={`Thumbnail ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Details */}
           <div className="glass rounded-2xl p-5 flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3">
               <h1 className="font-display font-700 text-2xl text-slate-100 leading-snug">{listing.title}</h1>
-              <span className={`badge border ${conditionBadge[listing.condition]}`}>{listing.condition}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={`badge border ${conditionBadge[listing.condition]}`}>{listing.condition}</span>
+                {isSeller && isActive && bids.length === 0 && (
+                  <Link
+                    to={`/listings/${id}/edit`}
+                    className="btn btn-secondary btn-sm flex items-center gap-1.5 py-1 px-2.5 text-xs"
+                  >
+                    <Edit3 size={12} /> Edit
+                  </Link>
+                )}
+              </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed">{listing.description}</p>
             <div className="flex items-center gap-3 text-sm text-slate-400">

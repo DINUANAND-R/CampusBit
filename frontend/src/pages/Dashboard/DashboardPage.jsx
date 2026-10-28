@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { listingsApi, bidsApi } from '../../api';
 import Countdown from '../../components/Countdown';
-import { Gavel, Package, TrendingUp, ChevronRight, Plus } from 'lucide-react';
+import { Gavel, Package, TrendingUp, ChevronRight, Plus, Edit3 } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const statusColor = {
   active:    'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
@@ -82,28 +83,45 @@ export default function DashboardPage() {
               <Package size={40} className="mx-auto mb-3 text-slate-600" />
               <p>No listings yet. <Link to="/listings/new" className="text-brand-400">Create your first →</Link></p>
             </div>
-          ) : myListings.map((l) => (
-            <Link key={l._id} to={`/listings/${l._id}`} id={`my-listing-${l._id}`}
-              className="glass rounded-xl p-4 flex items-center gap-4 card-hover">
-              <div className="w-12 h-12 rounded-xl bg-surface-700 flex items-center justify-center text-xl shrink-0 overflow-hidden">
-                {l.images?.[0] ? <img src={l.images[0]} alt="" className="w-full h-full object-cover" /> : '📦'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-600 text-slate-200 truncate">{l.title}</p>
-                <p className="text-sm text-slate-400">₹{l.currentPrice?.toLocaleString()}</p>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                {l.status === 'active' && <Countdown endsAt={l.endsAt} className="text-xs" />}
-                <span className={`badge border ${statusColor[l.status]}`}>{l.status}</span>
-                {(l.status === 'closed' || l.status === 'completed') && (
-                  <Link to={`/handover/${l._id}`} onClick={(e) => e.stopPropagation()}
-                    className="btn btn-secondary btn-sm">
-                    Handover <ChevronRight size={13} />
-                  </Link>
-                )}
-              </div>
-            </Link>
-          ))}
+          ) : myListings.map((l) => {
+            const thumb = getImageUrl(l.images?.[0]);
+            const canEdit = l.status === 'active' && l.currentPrice === l.startingPrice;
+            return (
+              <Link key={l._id} to={`/listings/${l._id}`} id={`my-listing-${l._id}`}
+                className="glass rounded-xl p-4 flex items-center gap-4 card-hover">
+                <div className="w-12 h-12 rounded-xl bg-surface-700 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                  {thumb ? (
+                    <img src={thumb} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    '📦'
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-600 text-slate-200 truncate">{l.title}</p>
+                  <p className="text-sm text-slate-400">₹{l.currentPrice?.toLocaleString()}</p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {l.status === 'active' && <Countdown endsAt={l.endsAt} className="text-xs" />}
+                  <span className={`badge border ${statusColor[l.status]}`}>{l.status}</span>
+                  {canEdit && (
+                    <Link
+                      to={`/listings/${l._id}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="btn btn-secondary btn-sm flex items-center gap-1"
+                    >
+                      <Edit3 size={13} /> Edit
+                    </Link>
+                  )}
+                  {(l.status === 'closed' || l.status === 'completed') && (
+                    <Link to={`/handover/${l._id}`} onClick={(e) => e.stopPropagation()}
+                      className="btn btn-secondary btn-sm">
+                      Handover <ChevronRight size={13} />
+                    </Link>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       ) : (
         <div className="flex flex-col gap-3">

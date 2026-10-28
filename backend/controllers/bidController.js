@@ -68,7 +68,7 @@ const placeBid = async (listingId, bidderId, amount) => {
       updateData.$inc = { __v: 1, extensionCount: 1 };
     }
 
-    const updated = await Listing.findOneAndUpdate(updateQuery, updateData, { new: true });
+    const updated = await Listing.findOneAndUpdate(updateQuery, updateData, { returnDocument: 'after' });
 
     if (!updated) {
       // Another bid snuck in — retry

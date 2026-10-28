@@ -8,6 +8,7 @@ import LoginPage           from './pages/Auth/LoginPage';
 import RegisterPage        from './pages/Auth/RegisterPage';
 import ListingDetailPage   from './pages/Listing/ListingDetailPage';
 import CreateListingPage   from './pages/Listing/CreateListingPage';
+import EditListingPage     from './pages/Listing/EditListingPage';
 import DashboardPage       from './pages/Dashboard/DashboardPage';
 import HandoverPage        from './pages/Handover/HandoverPage';
 import './App.css';
@@ -35,14 +36,15 @@ function AppRoutes() {
       <Navbar />
       <main>
         <Routes>
-          <Route path="/"              element={<BrowsePage />} />
-          <Route path="/login"         element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/register"      element={<GuestRoute><RegisterPage /></GuestRoute>} />
-          <Route path="/listings/:id"  element={<ListingDetailPage />} />
-          <Route path="/listings/new"  element={<PrivateRoute><CreateListingPage /></PrivateRoute>} />
-          <Route path="/dashboard"     element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-          <Route path="/handover/:id"  element={<PrivateRoute><HandoverPage /></PrivateRoute>} />
-          <Route path="*"              element={<Navigate to="/" replace />} />
+          <Route path="/"                 element={<BrowsePage />} />
+          <Route path="/login"            element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/register"         element={<GuestRoute><RegisterPage /></GuestRoute>} />
+          <Route path="/listings/:id"     element={<ListingDetailPage />} />
+          <Route path="/listings/:id/edit" element={<PrivateRoute><EditListingPage /></PrivateRoute>} />
+          <Route path="/listings/new"     element={<PrivateRoute><CreateListingPage /></PrivateRoute>} />
+          <Route path="/dashboard"        element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path="/handover/:id"     element={<PrivateRoute><HandoverPage /></PrivateRoute>} />
+          <Route path="*"                 element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </>

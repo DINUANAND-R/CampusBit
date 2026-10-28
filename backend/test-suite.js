@@ -174,6 +174,7 @@ async function runTestSuite() {
       startingPrice: 50,
       minBidIncrement: 10,
       durationHours: 1,
+      images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600'],
     };
     const fastCreate = await api('/listings', {
       method: 'POST',
@@ -272,6 +273,7 @@ async function runTestSuite() {
       startingPrice: 200,
       endsAt: new Date(Date.now() - 2000), // expired
       status: 'active',
+      images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600'],
     });
     console.log('  ⏳ Waiting up to 12s for cron to process unsold listing (no bids)...');
     for (let i = 0; i < 15; i++) {
@@ -295,6 +297,7 @@ async function runTestSuite() {
       winner: bidder1Id,
       endsAt: new Date(Date.now() - 2000), // expired
       status: 'active',
+      images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600'],
     });
     console.log('  ⏳ Waiting up to 12s for cron to process reserve-unmet listing...');
     for (let i = 0; i < 15; i++) {

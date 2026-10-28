@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "node test-suite.js"
+    "test": "node test-suite.js && node test-multer.js",
+    "test:suite": "node test-suite.js",
+    "test:multer": "node test-multer.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +22,7 @@
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.4",
+    "multer": "^2.5.0",
     "node-cron": "^4.6.0",
     "socket.io": "^4.8.4",
     "socket.io-client": "^4.8.4"

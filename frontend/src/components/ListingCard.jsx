@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Countdown from './Countdown';
 import { Tag, TrendingUp } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUrl';
 
 const conditionColors = {
   new:       'text-emerald-400 bg-emerald-400/10',
@@ -23,6 +24,7 @@ export default function ListingCard({ listing }) {
 
   const isActive = status === 'active';
   const hasBids  = currentPrice > startingPrice;
+  const coverUrl = getImageUrl(images?.[0]);
 
   return (
     <Link
@@ -31,18 +33,26 @@ export default function ListingCard({ listing }) {
       className="glass rounded-2xl overflow-hidden card-hover group block"
     >
       {/* Image */}
-      <div className="relative h-48 bg-surface-700 overflow-hidden">
-        {images?.[0] ? (
+      <div className="relative h-48 bg-surface-700 overflow-hidden flex items-center justify-center">
+        {coverUrl ? (
           <img
-            src={images[0]}
+            src={coverUrl}
             alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const placeholder = e.currentTarget.parentElement.querySelector('.fallback-placeholder');
+              if (placeholder) placeholder.style.display = 'flex';
+            }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl">
-            {categoryEmoji[category] || '📦'}
-          </div>
-        )}
+        ) : null}
+        <div
+          className={`fallback-placeholder w-full h-full items-center justify-center text-5xl ${
+            coverUrl ? 'hidden' : 'flex'
+          }`}
+        >
+          {categoryEmoji[category] || '📦'}
+        </div>
         {/* Status badge */}
         <div className="absolute top-3 left-3">
           {isActive ? (

@@ -55,6 +55,17 @@ app.use(
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ── Static Files (Uploads) ────────────────────────────────────────────────────
+const path = require('path');
+app.use(
+  '/uploads/listings',
+  express.static(path.join(__dirname, 'uploads', 'listings'), {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '1d',
+  })
+);
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
